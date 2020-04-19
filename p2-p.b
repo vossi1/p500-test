@@ -1,5 +1,6 @@
-; P500 burnin-test
-; disassembled by Vossi 02/2019
+; P500 diagnostic-test
+; disassembled by Vossi 04/2020
+; prepared for ACME reassembling
 !cpu 6502
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 !to "p2-p.prg", cbm 
