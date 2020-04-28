@@ -1,3 +1,6 @@
 P500 diagnostic-test
 disassembled by Vossi 04/2020
 prepared for ACME reassembling
+
+fix01 - colorbug on diag-screen
+fix02 - ram search bug BMI skips also bank if CMP has negative check result in sub
