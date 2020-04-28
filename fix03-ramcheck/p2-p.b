@@ -3,7 +3,7 @@
 ; prepared for ACME reassembling
 ; fix01 - colorbug on diag-screen
 ; fix02 - ram search bug BMI skips also bank if CMP has negative check result in sub
-; fix03 - search and show allr am banks bur test only 4
+; fix03 - search and show all ram banks bur test only 4
 !cpu 6502
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 !to "p2-p.prg", cbm 
