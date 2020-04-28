@@ -1085,13 +1085,13 @@ l2826:	!byte $d0, $d1, $d1, $d2
 		!byte $2c, $d8, $2d, $d8, $2e, $d8
 
 InitTable1:
-		!byte $00, $da, $01, $da, $02, $da, $03, $da
+		!byte $00, $da, $01, $da, $02, $da, $03, $da	; copied to $52
 		!byte $04, $da, $05, $da, $06, $da, $07, $da
-		!byte $08, $da, $09, $da, $0a, $da, $0b, $da
+		!byte $08, $da, $09, $da, $0a, $da, $0b, $da	; copied to $62
 		!byte $0c, $da, $0d, $da, $0e, $da, $0f, $da
-		!byte $10, $da, $11, $da, $12, $da, $13, $da
+		!byte $10, $da, $11, $da, $12, $da, $13, $da	; copied to $72
 		!byte $14, $da, $15, $da, $16, $da, $17, $da
-		!byte $18, $da, $19, $da, $1a, $da, $1b, $da
+		!byte $18, $da, $19, $da, $1a, $da, $1b, $da	; copied to $82
 		!byte $1c, $da
 
 		!byte $00, $dc, $01, $dc, $02, $dc, $03, $dc

@@ -20,6 +20,7 @@ GRAY1					= $0b
 ; ***************************************** ZERO PAGE *********************************************
 !addr pointer1			= $10		; 16bit pointer
 !addr ext_color			= $1b		; exterior color
+!addr delaycounter		= $1c		; 8bit counter for delay loop
 !addr copy_target_bank	= $2c		; copy target bank
 !addr copy_target		= $2d		; 16bit copy target address
 !addr rambanks			= $30		; found RAM banks
@@ -33,7 +34,11 @@ GRAY1					= $0b
 !addr check				= $46		; check variable
 !addr error				= $47		; error state
 !addr pointer2			= $4e		; 16bit pointer
-;						= $52		; table?
+!addr sid				= $52		; SID register table
+!addr tri1				= $52		; TRI1 register table - unused -
+!addr tri2				= $62		; TRI2 register table - unused -
+!addr cia				= $72		; CIA register table - unused -
+!addr acia				= $92		; ACIA register table - unused -
 ; ***************************************** ZONE MAIN *********************************************
 !zone main
 !initmem FILL
@@ -181,7 +186,7 @@ noram:	inx								; increase bank
 ; ----------------------------------------------------------------------------
 ; search for RAM - returns Z=1 if RAM found in page at pointer1
 SearchRAM:
-		clv
+		clv								; why ?
 		ldy #$00						; clear counter Y
 		lda #$a5						; value = $ a5
 framsto:sta (pointer1),y				; store to RAM				
@@ -197,20 +202,20 @@ framfnd	rts								; N=0 RAM found
 ; ----------------------------------------------------------------------------
 ; Clear screen
 ClearScreen:
-		lda #$d0
+		lda #$d0						; pointer = $d000 screen RAM
 		sta pointer1+1
 		ldy #$00
 		sty pointer1
 		lda #SYSTEMBANK
-		sta IndirectBank
-		lda #$20
-		ldx #$04
-clrscr: sta (pointer1),y
+		sta IndirectBank				; switch to bank 15
+		lda #$20						; fill with <SPACE>
+		ldx #$04						; 4 pages to clear
+clrscr: sta (pointer1),y				; store to screen RAM
 		iny
-		bne clrscr
+		bne clrscr						; next byte
 		inc pointer1+1
 		dex
-		bne clrscr
+		bne clrscr						; next page
 		rts
 ; ----------------------------------------------------------------------------
 ; Fills color memory Y bytes, counter pages with A
@@ -224,10 +229,10 @@ FillColor:
 		rts
 ; ----------------------------------------------------------------------------
 ; main test code
-test:	jsr InitZeropage				; init zeropage $52-$8c from InitTable1
+test:	jsr CopySIDTable				; init zeropage $52-$8c from SIDTable
 		lda #SYSTEMBANK
 		sta IndirectBank				; switch to bank 15
-		jsr l21f1
+		jsr PlaySound
 		jsr SetExteriorColor			; increase exterior color after each cycle
 		jsr DummySub					; Call 19x dummy-subroutine
 		jsr DummySub
@@ -294,30 +299,32 @@ DummySub:
 		rts
 		rti
 ; ----------------------------------------------------------------------------
-l21f1:	ldy #$00
+; play sound
+PlaySound:	
+		ldy #$00						; clear Y for indirect writes
 		lda IndirectBank
-		sta $4b
+		sta $4b							; remember target bank
 		lda #SYSTEMBANK
-		sta IndirectBank
-		sta ($82),y
+		sta IndirectBank				; indirect bank = bank 15
+		sta (sid+2* $18),y				; $da18 = $0f 	max volume
 		lda #$1a
-		sta ($6a),y
+		sta (sid+2* $0c),y				; $da0c = $1a 	voice 2 AD
 		lda #$0a
-		sta ($6c),y
-		lda #$4e
-		sta ($62),y
+		sta (sid+2* $0d),y				; $da0d = $0a	voice 2 SR
+		lda #$4e						; frequency = 200000 ~ note D#6
+		sta (sid+2* $08),y				; $da08 = $4e	voice 2 frequency hi
 		lda #$20
-		sta ($60),y
-		lda #$07
-		sta ($54),y
+		sta (sid+2* $07),y				; $da07 = $20	voice 2 frequency low
+		lda #$07						; frequency = 2000 ~ note B2
+		sta (sid+2* $01),y				; $da01 = $07	voice 1 frequency hi
 		lda #$d0
-		sta ($52),y
+		sta (sid+2* $00),y				; $da00 = $d0	voice 1 frequency low
 		lda #$15
-		sta ($68),y
+		sta (sid+2* $0b),y				; $da0b = $15	voice 2 triangle,ringmod,gate
 		lda #$14
-		sta ($68),y
+		sta (sid+2* $0b),y				; $da0b = $14	voice 2 triangle, ringmod
 		lda $4b
-		sta IndirectBank
+		sta IndirectBank				; restore target bank
 		rts
 ; ----------------------------------------------------------------------------
 ; copy code and switch to new bank
@@ -325,17 +332,17 @@ CopyCode:
 		lda #$ff
 		sta $3a
 		ldy rambanks
-		sty $4a
+		sty $4a							; store last bank to $4a
 		ldx CodeBank
-		stx copy_source_bank
-		dex
-		bpl notbnk0
-		ldx rambanks
-notbnk0:stx copy_target_bank
-		stx $31
+		stx copy_source_bank			; source bank = actual codebank
+		dex								; decrease bank
+		bpl notbnk0						; skip if codebank is > bank 0
+		ldx rambanks					; load last bank if code is in bank 0
+notbnk0:stx copy_target_bank			; starget bank = bank below code or last if code is in bank 0
+		stx $31							; store target bank to $31
 		ldx copy_target_bank
-		stx IndirectBank
-		jsr l22e3
+		stx IndirectBank				; set indirect bank = target bank
+		jsr RAMTest						; sub: RAM Test
 		ldx copy_target_bank
 		stx copy_source_bank
 		dex
@@ -381,7 +388,7 @@ l2282:	ldy CodeBank
 		sty copy_target_bank
 		ldx copy_target_bank
 		stx IndirectBank
-		jsr l22e3
+		jsr RAMTest
 l2295:	jsr l2299
 		rts
 ; ----------------------------------------------------------------------------
@@ -419,21 +426,23 @@ l2299:	lda #SYSTEMBANK
 		jsr CopyMemory
 		rts
 ; ----------------------------------------------------------------------------
-l22e3:	lda #$00
+; RAM test
+RAMTest:	
+		lda #$00						; clear A, X
 		tax
 		ldy #$02
-l22e8:	sty $42
+l22e8:	sty $42							; $42 = Y
 		stx $41
 		sta $25
 		dey
 		sty $26
 		lda #$00
-		sta pointer1
+		sta pointer1					; pointer1 lowbyte = $00
 		lda IndirectBank
-		cmp #$0f
-		beq l22fe
-		jsr l21f1
-l22fe:	ldy $42
+		cmp #$0f						; check if target = bank 15
+		beq notbnkf						; skip if not bank 15
+		jsr PlaySound					; play sound
+notbnkf:ldy $42
 		lda $41
 		sta pointer1+1
 l2304:	tya
@@ -471,7 +480,7 @@ l233f:	iny
 		lda pointer1+1
 		cmp $25
 		bne l2322
-		jsr l21f1
+		jsr PlaySound
 		jsr l261f
 		lda #$55
 		sta $44
@@ -540,7 +549,7 @@ l23d0:	iny
 		lda pointer1+1
 		cmp $25
 		bne l239b
-		jsr l21f1
+		jsr PlaySound
 		jsr l261f
 		ldx #$5a
 		stx check
@@ -614,7 +623,7 @@ l245f:	txa
 l246d:	dey
 		cpy $26
 		bne l2454
-		jsr l21f1
+		jsr PlaySound
 		jsr l2626
 		ldx #$5a
 l247a:	lda (pointer1),y
@@ -672,7 +681,7 @@ l24de:	iny
 		lda pointer1+1
 		cmp $25
 		bne l24c5
-		jsr l21f1
+		jsr PlaySound
 		jsr l2626
 		ldx #$00
 		stx $44
@@ -930,12 +939,13 @@ Nibble2Screencode:
 +		ora #$30						; add $30 -> screencode 0-9 of the digit
 ++		rts
 ; ----------------------------------------------------------------------------
-; 
-		jsr l26c9
+; unused
+		jsr +
 		asl
 		asl
 		rts
-l26c9:	clc
+
++		clc
 		sta temp
 		asl
 		asl
@@ -954,68 +964,74 @@ SetExteriorColor:
 		sta (colorpointer),y
 		rts
 ; ----------------------------------------------------------------------------
+; unused - delay $1000000 loops
 		ldy #$ff
 		ldx #$ff
-l26e6:	dey
-		bne l26e6
+-		dey
+		bne -
 		dex
-		bne l26e6
-		dec $1c
-		bne l26e6
+		bne -
+		dec delaycounter
+		bne -
 		rts
 ; ----------------------------------------------------------------------------
-		lda #$72
+; unused - copies CIA pointer to ZP
+		lda #cia
 		sta pointer1
 		lda #$00
 		sta pointer1+1
-		lda #$e2
-		ldx #$28
+		lda #<CIATable
+		ldx #>CIATable
 		ldy #$1f
 		jsr CopyTable
 		rts
 ; ----------------------------------------------------------------------------
-		lda #$62
+; unused - copies Triport2 pointer to ZP
+		lda #tri2
 		sta pointer1
 		lda #$00
 		sta pointer1+1
-		lda #$1a
-		ldx #$29
+		lda #<Tri2Table
+		ldx #>Tri2Table
 		ldy #$0f
 		jsr CopyTable
 		rts
 ; ----------------------------------------------------------------------------
-		lda #$52
+; unused - copies Triport1 pointer to ZP
+		lda #tri1
 		sta pointer1
 		lda #$00
 		sta pointer1+1
-		lda #$0a
-		ldx #$29
+		lda #<Tri1Table
+		ldx #>Tri1Table
 		ldy #$0f
 		jsr CopyTable
 		rts
 ; ----------------------------------------------------------------------------
-		lda #$92
+; unused - copies ACIA pointer to ZP
+		lda #acia
 		sta pointer1
 		lda #$00
 		sta pointer1+1
-		lda #$02
-		ldx #$29
+		lda #<ACIATable
+		ldx #>ACIATable
 		ldy #$07
 		jsr CopyTable
 		rts
 ; ----------------------------------------------------------------------------
-; init zeropage
-InitZeropage:
-		lda #$52						; pointer = $0052 
+; copy sid-pointer-table to zeropage for indirect access
+CopySIDTable:
+		lda #sid						; sid pointer in ZP
 		sta pointer1
 		lda #$00
 		sta pointer1+1
-		lda #<InitTable1				; XA = InitTable1
-		ldx #>InitTable1
+		lda #<SIDTable					; XA = SIDTable
+		ldx #>SIDTable
 		ldy #$39						; bytes to copy = $00-$39
 		jsr CopyTable					; sub: copy table
 		rts
 ; ----------------------------------------------------------------------------
+; unused
 		lda #$f0
 		sta $fffa
 		lda #$00
@@ -1071,6 +1087,8 @@ l2826:	!byte $d0, $d1, $d1, $d2
 !scr " * *  BAD PROGRAM CHECKSUM  * * "
 
 ;284a
+; unused - VIC pointer
+VICTable:
 		!byte $00, $d8, $01, $d8, $02, $d8, $03, $d8
 		!byte $04, $d8, $05, $d8, $06, $d8, $07, $d8
 		!byte $08, $d8, $09, $d8, $0a, $d8, $0b, $d8
@@ -1083,8 +1101,8 @@ l2826:	!byte $d0, $d1, $d1, $d2
 		!byte $24, $d8, $25, $d8, $26, $d8, $27, $d8
 		!byte $28, $d8, $29, $d8, $2a, $d8, $2b, $d8
 		!byte $2c, $d8, $2d, $d8, $2e, $d8
-
-InitTable1:
+; SID pointer copied to $52
+SIDTable:
 		!byte $00, $da, $01, $da, $02, $da, $03, $da
 		!byte $04, $da, $05, $da, $06, $da, $07, $da
 		!byte $08, $da, $09, $da, $0a, $da, $0b, $da
@@ -1093,14 +1111,21 @@ InitTable1:
 		!byte $14, $da, $15, $da, $16, $da, $17, $da
 		!byte $18, $da, $19, $da, $1a, $da, $1b, $da
 		!byte $1c, $da
-
+; unused - CIA Table copied to $72
+CIATable:
 		!byte $00, $dc, $01, $dc, $02, $dc, $03, $dc
 		!byte $04, $dc, $05, $dc, $06, $dc, $07, $dc
 		!byte $08, $dc, $09, $dc, $0a, $dc, $0b, $dc
 		!byte $0c, $dc, $0d, $dc, $0e, $dc, $0f, $dc
+; unused - ACIA pointer copied to $92
+ACIATable:
 		!byte $00, $dd, $01, $dd, $02, $dd, $03, $dd
+; unused - Triport1 pointer copied to $52
+Tri1Table:
 		!byte $00, $de, $01, $de, $02, $de, $03, $de
 		!byte $04, $de, $05, $de, $06, $de, $07, $de
+; unused - Triport2 pointer copied to $62
+Tri2Table:
 		!byte $00, $df, $01, $df, $02, $df, $03, $df
 		!byte $04, $df, $05, $df, $06, $df, $07, $df
 
