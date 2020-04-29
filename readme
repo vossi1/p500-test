@@ -6,3 +6,4 @@ fix01 - colorbug on diag-screen
 fix02 - ram search bug BMI skips also bank if CMP has negative check result in sub
 fix03 - search and show allr am banks bur test only 4
 fix04 - bank 0 fault not shown, bank 0 bit direction wrong
+fix05 - graphics char for ROM, (improved) ;)

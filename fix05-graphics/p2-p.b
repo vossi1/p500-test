@@ -9,7 +9,7 @@
 !cpu 6502
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 ; switches
-;ROM = 0		; assemble extension rom
+ROM = 0		; assemble extension rom
 !ifdef 	ROM{!to "p2-p.bin", plain
 } else{ 	!to "p2-p.prg", cbm }
 ; ***************************************** CONSTANTS *********************************************
