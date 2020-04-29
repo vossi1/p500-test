@@ -197,7 +197,12 @@ noram:	inx								; increase bank
 		lda #$0d						; color $0d = light green
 		sta (pointer1),y
 		dec last_rambank				; decrease bank count to get last bank (first bank = 0)
-		jmp Max4Banks					; jump cut to max 4 banks to test ********* PATCHED *********
+		lda last_rambank				; check if more than 4 RAM banks ********* PATCHED *********
+		cmp #$04
+		bmi max4bnk						; skip if last bank is <= 3
+		lda #$03						; reduce last bank to test = 3
+		sta last_rambank
+max4bnk:jmp Main						; jump to main code
 ; ----------------------------------------------------------------------------
 ; search for RAM - returns Z=1 if RAM found in page at pointer1
 SearchRAM:
@@ -1167,16 +1172,6 @@ Tri1Table:
 Tri2Table:
 		!byte $00, $df, $01, $df, $02, $df, $03, $df
 		!byte $04, $df, $05, $df, $06, $df, $07, $df
-
-; ----------------------------------------------------------------------------
-; reduce last bank to test = max 3
-Max4Banks:												; ********* PATCHED *********
-		lda last_rambank
-		cmp #$04
-		bmi max4bnk
-		lda #$03
-		sta last_rambank
-max4bnk:jmp Main
 ; ************************************* ZONE SCREENDATA *******************************************
 !zone screendata
 *= $3000
