@@ -43,8 +43,8 @@ GRAY1					= $0b
 !addr error				= $47		; error state
 !addr pointer2			= $4e		; 16bit pointer
 !addr sid_pointer		= $52		; SID register table
-!addr tri1_pointer		= $52		; TRI1 register table - unused -
-!addr tri2_pointer		= $62		; TRI2 register table - unused -
+!addr tri1_pointer		= $52		; TPI1 register table - unused -
+!addr tri2_pointer		= $62		; TPI2 register table - unused -
 !addr cia_pointer		= $72		; CIA register table - unused -
 !addr acia_pointer		= $92		; ACIA register table - unused -
 ; ****************************************** MACROS ***********************************************
@@ -278,7 +278,7 @@ Main:	jsr CopySIDTable				; init zeropage $52-$8c from SIDTable
 		jsr DummySub
 		jsr DummySub
 		jsr DummySub
-		jsr Test					; sub: copy code and switch to new bank
+		jsr Test					; sub: test, copy code, switch to new bank
 		ldx #$03
 		sed
 		sec
@@ -1034,8 +1034,8 @@ SetExteriorColor:
 		sta pointer1
 		lda #$00
 		sta pointer1+1
-		lda #<Tri2Table
-		ldx #>Tri2Table
+		lda #<TPI2Table
+		ldx #>TPI2Table
 		ldy #$0f
 		jsr CopyTable
 		rts
@@ -1045,8 +1045,8 @@ SetExteriorColor:
 		sta pointer1
 		lda #$00
 		sta pointer1+1
-		lda #<Tri1Table
-		ldx #>Tri1Table
+		lda #<TPI1Table
+		ldx #>TPI1Table
 		ldy #$0f
 		jsr CopyTable
 		rts
@@ -1165,11 +1165,11 @@ CIATable:
 ACIATable:
 		!byte $00, $dd, $01, $dd, $02, $dd, $03, $dd
 ; unused - Triport1 pointer copied to $52
-Tri1Table:
+TPI1Table:
 		!byte $00, $de, $01, $de, $02, $de, $03, $de
 		!byte $04, $de, $05, $de, $06, $de, $07, $de
 ; unused - Triport2 pointer copied to $62
-Tri2Table:
+TPI2Table:
 		!byte $00, $df, $01, $df, $02, $df, $03, $df
 		!byte $04, $df, $05, $df, $06, $df, $07, $df
 ; ************************************* ZONE SCREENDATA *******************************************
