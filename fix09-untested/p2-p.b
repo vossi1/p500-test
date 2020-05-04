@@ -362,7 +362,7 @@ DummySub:
 PlaySound:	
 		ldy #$00						; clear Y for indirect writes
 		lda IndirectBank
-		sta temp_bank							; remember target bank
+		sta temp_bank					; remember target bank
 		lda #SYSTEMBANK
 		sta IndirectBank				; indirect bank = bank 15
 		+WriteSID $18					; volume = 15 (A already 15)
@@ -517,12 +517,12 @@ RamTestBank15:
 		sta pointer3+1					; pointer3 = screen RAM
 		lda IndirectBank
 		sta temp_bank					; remeber sctual test bank	********* PATCHED *********
-		ldy #SYSTEMBANK					;							********* PATCHED *********
-		sty IndirectBank				; switch to bank 15			********* PATCHED *********
+		ldy #SYSTEMBANK
+		sty IndirectBank				; switch to bank 15
 		jsr Nibble2Screencode			; convert bank number to screen code
-		ldy #(40*1 + 9)					; Y = line 2 char 6			********* PATCHED *********
+		ldy #(40*1 + 9)					; Y = line 2 char 6	
 		sta (pointer3),y				; write actual test bank number to screen
-		lda temp_bank					;							********* PATCHED *********
+		lda temp_bank
 		sta IndirectBank				; restore test bank			********* PATCHED *********
 		cmp #$0f						; check if target = bank 15
 		beq notbnkf						; skip if not bank 15
@@ -993,7 +993,7 @@ CopyMemory:
 		lda #$00						; clear $47
 		sta error
 		ldy $3f							; load start low byte
-		lda temp3							; check if temp4 = $00
+		lda temp3						; check if temp4 = $00
 		ora temp4
 		and temp4
 		bne +							; skip if $45 not $00
@@ -1219,7 +1219,7 @@ VICTable:
 		!byte $14, $d8, $15, $d8, $16, $d8, $17, $d8
 		!byte $18, $d8, $19, $d8, $1a, $d8, $1b, $d8
 		!byte $1c, $d8, $1d, $d8, $1e, $d8, $1f, $d8
-		!byte $20, $d8, cycles, $d8, $22, $d8, $23, $d8
+		!byte $20, $d8, $21, $d8, $22, $d8, $23, $d8
 		!byte $24, $d8, $25, $d8, $26, $d8, $27, $d8
 		!byte $28, $d8, $29, $d8, $2a, $d8, $2b, $d8
 		!byte $2c, $d8, $2d, $d8, $2e, $d8
