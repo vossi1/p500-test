@@ -9,3 +9,4 @@ fix04 - bank 0 fault not shown, bank 0 bit direction wrong
 fix05 - graphics char for ROM, (improved) ;)
 fix06 - use all three SID voices
 fix07 - test bank counter
+fix08 - cycles counter line1 for 8 digits space
