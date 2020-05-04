@@ -33,6 +33,7 @@ LIGHTGREEN				= $0d
 !addr CodeBank			= $00		; code bank register
 !addr IndirectBank		= $01		; indirect bank register
 !addr ScreenRAM			= $d000		; Screen RAM
+!addr ColorRAM			= $d400		; Color RAM
 !addr VIC				= $d800		; VIC register
 ; ***************************************** ZERO PAGE *********************************************
 !addr pointer1			= $10		; 16bit pointer
@@ -51,7 +52,7 @@ LIGHTGREEN				= $0d
 !addr copy_source		= $33		; 16bit copy source address
 !addr counter			= $35		; counter
 !addr color_pointer		= $36		; 16bit colorpointer
-!addr test_mask			= $3a		; test		
+!addr test_mask			= $3a		; test mask (to test only 4 bit in color RAM)		
 !addr start_high		= $41		; test start address highbyte	
 !addr start_low			= $42		; test start address lowbyte	
 !addr start_high		= $41		; test start address highbyte	
@@ -61,6 +62,7 @@ LIGHTGREEN				= $0d
 !addr check				= $46		; check variable
 !addr error				= $47		; error state
 !addr temp5				= $49		; temp variable
+!addr banks_counter		= $4a		; counter for banks to test in a cycle
 !addr temp_bank			= $4b		; temp bank variable
 !addr pointer2			= $4e		; 16bit pointer
 !addr pointer3			= $50		; 16bit pointer
@@ -401,98 +403,100 @@ Test:
 		lda #$ff
 		sta test_mask					; test-mask - $ff = test all bits
 		ldy last_rambank
-		sty $4a							; store last bank to $4a
+		sty banks_counter				; counter for banks to test
 		ldx CodeBank
 		stx copy_source_bank			; source bank = actual codebank
-		dex								; decrease bank
-		bpl notbnk0						; skip if codebank is > bank 0
-		ldx last_rambank				; load last bank if code is in bank 0
-notbnk0:stx copy_target_bank			; starget bank = bank below code or last if code is in bank 0
-		stx $31							; store target bank to $31
+		dex								; decrease for bank to test
+		bpl tstnxbk						; skip if testbank is >= 0
+		ldx last_rambank				; load last RAM bank if code is in bank 0
+tstnxbk:stx copy_target_bank
+		stx $31							; remember target (test) bank $31
 		ldx copy_target_bank
 		stx IndirectBank				; set indirect bank = target bank
-		jsr RAMTest						; sub: RAM Test
+		jsr RAMTest						; sub: RAM Test - bank below code or last bank
 		ldx copy_target_bank
-		stx copy_source_bank
-		dex
-		bpl l2247
+		stx copy_source_bank			; source bank = last test bank
+		dex								; decrease bank
+		bpl tbnknt0						; skip if testbank is >= 0
 		ldx last_rambank
-l2247:	stx copy_target_bank
-		dec $4a
-		bne notbnk0
+tbnknt0:stx copy_target_bank			; store new target bank 
+		dec banks_counter				; decrease banks to test counter
+		bne tstnxbk						; test bank below
 		ldy last_rambank
-		sty $4a
+		sty banks_counter				; store last bank in banks counter
 		ldx CodeBank
-		dex
-		bpl l2258
-		ldx last_rambank
-l2258:	lda $15,x
-		beq l2267
-l225c:	dex
-		bpl l2261
-		ldx last_rambank
-l2261:	dec $4a
-		bne l2258
-		beq l2295
-l2267:	stx temp5
+		dex								; decrease code bank
+		bpl tchknbk						; skip if bank is >= 0
+		ldx last_rambank				; load last RAM bank if code is in bank 0
+tchknbk:lda $15,x						; check if RAM bank is OK = $00
+		beq tstcpcd						; jump to code copy if new bank is OK
+tscpnok:dex
+		bpl notbk0d						; skip if new code bank is >= 0
+		ldx last_rambank				; load last RAM bank if <0
+notbk0d:dec banks_counter
+		bne tchknbk						; check if next bank is OK as new code bank
+		beq tstnocb						; skip code copy if new new OK code bank found
+tstcpcd:stx temp5
 		txa
 		ldx #$00
 		ldy #$00
-		jsr l26a2
+		jsr SetCopyTarget				; sub: set copy target = new codebank, start=$0000
 		lda CodeBank
-		jsr l2699
-		ldx #$29
-		inx
-		jsr CopyMemory
-		beq l2282
+		jsr SetCopySource				; sub: set copy source = actual codebank, start=$0000
+		ldx #$29						; code size in pages to copy
+		inx								; increase one page
+		jsr CopyMemory					; copy code to new bank
+		beq tstcpok						; branch if returns 0=ok
 		ldx temp5
-		bpl l225c
-l2282:	ldy CodeBank
+		bpl tscpnok						; try next bank if copy was not ok
+tstcpok:ldy CodeBank					; remembers old code bank in Y
 		ldx temp5
-		stx CodeBank
+		stx CodeBank					; switch to new code bank
 		nop
 		nop
 		nop
 		nop
-		sty copy_target_bank
+		sty copy_target_bank			; store old code bank as new test bank
 		ldx copy_target_bank
-		stx IndirectBank
-		jsr RAMTest
-l2295:	jsr l2299
+		stx IndirectBank				; switch indirect bank to test bank
+		jsr RAMTest						; test previous code bank after code copy 
+tstnocb:jsr TestBank15					; test ram areas in bank 15
 		rts
 ; ----------------------------------------------------------------------------
-l2299:	lda #SYSTEMBANK
-		sta IndirectBank
+; Test RAMareas in bank 15
+TestBank15:
+		lda #SYSTEMBANK
+		sta IndirectBank				; switch to bank 15
 		ldy #$02
 		ldx #$00
 		lda #$08
-		jsr l22e8
+		jsr RamTestBank15				; test $0002-$0800 = 6116 ZP
 		lda CodeBank
-		ldx #$d0
-		ldy #$00
-		jsr l26a2
-		lda #$0f
-		jsr l2699
+		ldx #>ScreenRAM
+		ldy #<ScreenRAM					; copy address = Screen RAM
+		jsr SetCopyTarget				; set copy target = actual bank
+		lda #SYSTEMBANK
+		jsr SetCopySource				; set copy source = bank 15
 		ldx #$08
-		jsr CopyMemory
-		lda #$d4
-		ldy #$00
-		ldx #$d0
-		jsr l22e8
+		jsr CopyMemory					; copy 8 pages Screen+Color RAM
+		lda #>ColorRAM
+		ldy #<ScreenRAM
+		ldx #>ScreenRAM
+		jsr RamTestBank15				; test $d000-$d3ff = Screen RAMs
 		lda #$0f
-		sta test_mask
-		lda #$d8
-		ldy #$00
-		ldx #$d4
-		jsr l22e8
-		lda #$0f
-		ldx #$d0
-		ldy #$00
-		jsr l26a2
+		sta test_mask					; set test mask = low nibble for color RAM
+		lda #>VIC
+		ldy #<ColorRAM
+		ldx #>ColorRAM
+		jsr RamTestBank15				; test $d400-$d7ff = Color RAM
+		lda #SYSTEMBANK
+		ldx #>ScreenRAM
+		ldy #<ScreenRAM
+		jsr SetCopyTarget				; copy target = $d000, bank 15
 		lda CodeBank
-		jsr l2699
+		jsr SetCopySource				; copy source = actual code bank
 		ldx #$08
-		jsr CopyMemory
+		jsr CopyMemory					; copy 8 pages back to Screen+Color RAM
 		rts
 ; ----------------------------------------------------------------------------
 ; RAM test
@@ -500,7 +504,8 @@ RAMTest:
 		lda #$00						; test start address = $0002
 		tax
 		ldy #$02						; test start address 
-l22e8:	sty start_low					; remember start address lowbyte (start with $02)
+RamTestBank15:	
+		sty start_low					; remember start address lowbyte (start with $02)
 		stx start_high					; remember start address highbyte
 		sta test_pages					; $00 = test all pages
 		dey
@@ -1013,17 +1018,22 @@ CopyMemory:
 		inc copy_target+1
 		dec counter						; decrease page counter
 		bne -							; check next page
-		ldx temp_bank							; restore indirect bank
+		ldx temp_bank					; restore indirect bank
 		stx IndirectBank
 		lda error						; return error state 0=ok, 1=error
 		rts
-
-l2699:	sta copy_source_bank
+; ----------------------------------------------------------------------------
+; Store copy source from A=bank, X=high, Y=low
+SetCopySource:	
+		sta copy_source_bank
 		stx copy_source+1
 		stx temp3
 		sty copy_source
 		rts
-l26a2:	sta copy_target_bank
+; ----------------------------------------------------------------------------
+; Store copy target from A=bank, X=high, Y=low
+SetCopyTarget:	
+		sta copy_target_bank
 		stx copy_target+1
 		stx temp4
 		sty copy_target
