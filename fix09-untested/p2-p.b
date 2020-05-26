@@ -9,7 +9,7 @@
 ; fix06 - use all three SID voices
 ; fix07 - test bank counter
 ; fix08	- cycles counter line1 for 8 digits space
-; fix09 - removed untested chip-numbers
+; fix09 - removed untested chip-numbers - small fix: adr errorbar bank 3 lobyte wrong
 !cpu 6502
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 ; switches
@@ -1200,7 +1200,7 @@ Messages:
 		!scr "6526 TIMERS TESTS "
 
 ErrorBarsLow:
-		!byte $89, $a9, $49, $c1 ; ************ patched last byte to first
+		!byte $89, $a9, $49, $e9 ; ************ patched last byte to first
 
 ErrorBarsHigh:
 		!byte $d2, $d0, $d1, $d1 ; *********** patched last byte to first
