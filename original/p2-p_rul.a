@@ -2,3398 +2,3398 @@
 ; modified by Vossi 02/2019
 !cpu 6502
 *= $2000
-		sei
-		cld
-		ldx #$ff
-		txs
-		ldy #$02
-		lda #$00
+	sei
+	cld
+	ldx #$ff
+	txs
+	ldy #$02
+	lda #$00
 l2009:	sta $0000,y
-		iny
-		bne l2009
-		jsr $2136
-		lda #$30
-		sta $34
-		lda #$00
-		sta $33
-		lda #$d0
-		sta $2e
-		lda #$00
-		sta $2d
-		lda $00
-		sta $32
-		lda #$0f
-		sta $2c
-		ldx #$04
-		jsr $262e
-		ldx #$0f
-		stx $01
-		lda #$00
-		ldy #$00
-		ldx #$d8
-		stx $37
-		ldx #$21
-		stx $36
-		sta ($36),y
-		lda #$0b
-		sta $1b
-		jsr $26d1
-		lda #$0c
-		ldx #$04
-		stx $35
-		ldx #$d4
-		stx $37
-		ldx #$00
-		stx $36
-		ldy #$ff
-		jsr $2151
-		ldx #$01
-		stx $35
-		ldx #$d4
-		stx $37
-		ldx #$0b
-		stx $36
-		lda #$08
-		ldy #$11
-		jsr $2151
-		lda #$07
-		ldy #$00
-		ldx #$d4
-		stx $37
-		ldx #$0b
-		stx $36
-		sta ($36),y
-		ldy #$12
-		sta ($36),y
-		ldy #$13
-		ldx #$32
-		stx $36
-		inc $35
-		jsr $2151
-		dec $37
-		lda #$01
-		inc $35
-		ldx #$60
-		stx $36
-		ldy #$08
-		jsr $2151
-		lda #$03
-		ldy #$1d
-		inc $35
-		ldx #$d5
-		stx $37
-		ldx #$20
-		stx $36
-		jsr $2151
-		inc $35
-		dec $37
-		ldx #$c0
-		stx $36
-		ldy #$1d
-		jsr $2151
-		inc $35
-		ldx #$d6
-		stx $37
-		ldx #$60
-		stx $36
-		ldy #$1d
-		jsr $2151
-		inc $35
-		ldx #$d7
-		stx $37
-		ldx #$00
-		stx $36
-		ldy #$1d
-		jsr $2151
-		inc $35
-		dec $37
-		ldx #$a0
-		stx $36
-		ldy #$1d
-		jsr $2151
-		ldx #$00
+	iny
+	bne l2009
+	jsr $2136
+	lda #$30
+	sta $34
+	lda #$00
+	sta $33
+	lda #$d0
+	sta $2e
+	lda #$00
+	sta $2d
+	lda $00
+	sta $32
+	lda #$0f
+	sta $2c
+	ldx #$04
+	jsr $262e
+	ldx #$0f
+	stx $01
+	lda #$00
+	ldy #$00
+	ldx #$d8
+	stx $37
+	ldx #$21
+	stx $36
+	sta ($36),y
+	lda #$0b
+	sta $1b
+	jsr $26d1
+	lda #$0c
+	ldx #$04
+	stx $35
+	ldx #$d4
+	stx $37
+	ldx #$00
+	stx $36
+	ldy #$ff
+	jsr $2151
+	ldx #$01
+	stx $35
+	ldx #$d4
+	stx $37
+	ldx #$0b
+	stx $36
+	lda #$08
+	ldy #$11
+	jsr $2151
+	lda #$07
+	ldy #$00
+	ldx #$d4
+	stx $37
+	ldx #$0b
+	stx $36
+	sta ($36),y
+	ldy #$12
+	sta ($36),y
+	ldy #$13
+	ldx #$32
+	stx $36
+	inc $35
+	jsr $2151
+	dec $37
+	lda #$01
+	inc $35
+	ldx #$60
+	stx $36
+	ldy #$08
+	jsr $2151
+	lda #$03
+	ldy #$1d
+	inc $35
+	ldx #$d5
+	stx $37
+	ldx #$20
+	stx $36
+	jsr $2151
+	inc $35
+	dec $37
+	ldx #$c0
+	stx $36
+	ldy #$1d
+	jsr $2151
+	inc $35
+	ldx #$d6
+	stx $37
+	ldx #$60
+	stx $36
+	ldy #$1d
+	jsr $2151
+	inc $35
+	ldx #$d7
+	stx $37
+	ldx #$00
+	stx $36
+	ldy #$1d
+	jsr $2151
+	inc $35
+	dec $37
+	ldx #$a0
+	stx $36
+	ldy #$1d
+	jsr $2151
+	ldx #$00
 l20e5:	stx $01
-		lda #$08
-		sta $11
-		lda #$00
-		sta $10
-		jsr $2121
-		bmi l20f6
-		inc $30
+	lda #$08
+	sta $11
+	lda #$00
+	sta $10
+	jsr $2121
+	bmi l20f6
+	inc $30
 l20f6:	inx
-		cpx #$04
-		bne l20e5
-		lda $30
-		jsr $26ab
-		lda #$09
-		sta $10
-		lda #$d0
-		sta $11
-		tya
-		ldy #$0f
-		sty $01
-		ldy #$00
-		sta ($10),y
-		lda $11
-		clc
-		adc #$04
-		sta $11
-		lda #$0d
-		sta ($10),y
-		dec $30
-		jmp $215e
-		clv
-		ldy #$00
-		lda #$a5
+	cpx #$04
+	bne l20e5
+	lda $30
+	jsr $26ab
+	lda #$09
+	sta $10
+	lda #$d0
+	sta $11
+	tya
+	ldy #$0f
+	sty $01
+	ldy #$00
+	sta ($10),y
+	lda $11
+	clc
+	adc #$04
+	sta $11
+	lda #$0d
+	sta ($10),y
+	dec $30
+	jmp $215e
+	clv
+	ldy #$00
+	lda #$a5
 l2126:	sta ($10),y
-		iny
-		bne l2126
+	iny
+	bne l2126
 l212b:	lda ($10),y
-		cmp #$a5
-		beq l2135
-		iny
-		bne l212b
-		dey
+	cmp #$a5
+	beq l2135
+	iny
+	bne l212b
+	dey
 l2135:	rts
-		lda #$d0
-		sta $11
-		ldy #$00
-		sty $10
-		lda #$0f
-		sta $01
-		lda #$20
-		ldx #$04
+	lda #$d0
+	sta $11
+	ldy #$00
+	sty $10
+	lda #$0f
+	sta $01
+	lda #$20
+	ldx #$04
 l2146:	sta ($10),y
-		iny
-		bne l2146
-		inc $11
-		dex
-		bne l2146
-		rts
+	iny
+	bne l2146
+	inc $11
+	dex
+	bne l2146
+	rts
 l2151:	sta ($36),y
-		dey
-		bne l2151
-		dey
-		inc $37
-		dec $35
-		bne l2151
-		rts
-		jsr $2739
-		lda #$0f
-		sta $01
-		jsr $21f1
-		jsr $26d1
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $21ef
-		jsr $2222
-		ldx #$03
-		sed
-		sec
+	dey
+	bne l2151
+	dey
+	inc $37
+	dec $35
+	bne l2151
+	rts
+	jsr $2739
+	lda #$0f
+	sta $01
+	jsr $21f1
+	jsr $26d1
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $21ef
+	jsr $2222
+	ldx #$03
+	sed
+	sec
 l21ab:	lda $21,x
-		adc #$00
-		sta $21,x
-		bcc l21b6
-		dex
-		bpl l21ab
+	adc #$00
+	sta $21,x
+	bcc l21b6
+	dex
+	bpl l21ab
 l21b6:	lda #$20
-		sta $10
-		lda #$d0
-		sta $11
-		lda #$0f
-		sta $01
-		ldx #$ff
-		ldy #$00
+	sta $10
+	lda #$d0
+	sta $11
+	lda #$0f
+	sta $01
+	ldx #$ff
+	ldy #$00
 l21c6:	inx
-		cpx #$04
-		bne l21ce
-		dex
-		bne l21dc
+	cpx #$04
+	bne l21ce
+	dex
+	bne l21dc
 l21ce:	lda $21,x
-		beq l21c6
-		and #$f0
-		beq l21dc
+	beq l21c6
+	and #$f0
+	beq l21dc
 l21d6:	jsr $26b1
-		sta ($10),y
-		iny
+	sta ($10),y
+	iny
 l21dc:	lda $21,x
-		jsr $26b5
-		sta ($10),y
-		iny
-		inx
-		lda $21,x
-		cpx #$04
-		bne l21d6
-		cld
-		jmp $215e
-		rts
-		rti
-		ldy #$00
-		lda $01
-		sta $4b
-		lda #$0f
-		sta $01
-		sta ($82),y
-		lda #$1a
-		sta ($6a),y
-		lda #$0a
-		sta ($6c),y
-		lda #$4e
-		sta ($62),y
-		lda #$20
-		sta ($60),y
-		lda #$07
-		sta ($54),y
-		lda #$d0
-		sta ($52),y
-		lda #$15
-		sta ($68),y
-		lda #$14
-		sta ($68),y
-		lda $4b
-		sta $01
-		rts
-		lda #$ff
-		sta $3a
-		ldy $30
-		sty $4a
-		ldx $00
-		stx $32
-		dex
-		bpl l2233
-		ldx $30
+	jsr $26b5
+	sta ($10),y
+	iny
+	inx
+	lda $21,x
+	cpx #$04
+	bne l21d6
+	cld
+	jmp $215e
+	rts
+	rti
+	ldy #$00
+	lda $01
+	sta $4b
+	lda #$0f
+	sta $01
+	sta ($82),y
+	lda #$1a
+	sta ($6a),y
+	lda #$0a
+	sta ($6c),y
+	lda #$4e
+	sta ($62),y
+	lda #$20
+	sta ($60),y
+	lda #$07
+	sta ($54),y
+	lda #$d0
+	sta ($52),y
+	lda #$15
+	sta ($68),y
+	lda #$14
+	sta ($68),y
+	lda $4b
+	sta $01
+	rts
+	lda #$ff
+	sta $3a
+	ldy $30
+	sty $4a
+	ldx $00
+	stx $32
+	dex
+	bpl l2233
+	ldx $30
 l2233:	stx $2c
-		stx $31
-		ldx $2c
-		stx $01
-		jsr $22e3
-		ldx $2c
-		stx $32
-		dex
-		bpl l2247
-		ldx $30
+	stx $31
+	ldx $2c
+	stx $01
+	jsr $22e3
+	ldx $2c
+	stx $32
+	dex
+	bpl l2247
+	ldx $30
 l2247:	stx $2c
-		dec $4a
-		bne l2233
-		ldy $30
-		sty $4a
-		ldx $00
-		dex
-		bpl l2258
-		ldx $30
+	dec $4a
+	bne l2233
+	ldy $30
+	sty $4a
+	ldx $00
+	dex
+	bpl l2258
+	ldx $30
 l2258:	lda $15,x
-		beq l2267
+	beq l2267
 l225c:	dex
-		bpl l2261
-		ldx $30
+	bpl l2261
+	ldx $30
 l2261:	dec $4a
-		bne l2258
-		beq l2295
+	bne l2258
+	beq l2295
 l2267:	stx $49
-		txa
-		ldx #$00
-		ldy #$00
-		jsr $26a2
-		lda $00
-		jsr $2699
-		ldx #$29
-		inx
-		jsr $262e
-		beq l2282
-		ldx $49
-		bpl l225c
+	txa
+	ldx #$00
+	ldy #$00
+	jsr $26a2
+	lda $00
+	jsr $2699
+	ldx #$29
+	inx
+	jsr $262e
+	beq l2282
+	ldx $49
+	bpl l225c
 l2282:	ldy $00
-		ldx $49
-		stx $00
-		nop
-		nop
-		nop
-		nop
-		sty $2c
-		ldx $2c
-		stx $01
-		jsr $22e3
+	ldx $49
+	stx $00
+	nop
+	nop
+	nop
+	nop
+	sty $2c
+	ldx $2c
+	stx $01
+	jsr $22e3
 l2295:	jsr $2299
-		rts
-		lda #$0f
-		sta $01
-		ldy #$02
-		ldx #$00
-		lda #$08
-		jsr $22e8
-		lda $00
-		ldx #$d0
-		ldy #$00
-		jsr $26a2
-		lda #$0f
-		jsr $2699
-		ldx #$08
-		jsr $262e
-		lda #$d4
-		ldy #$00
-		ldx #$d0
-		jsr $22e8
-		lda #$0f
-		sta $3a
-		lda #$d8
-		ldy #$00
-		ldx #$d4
-		jsr $22e8
-		lda #$0f
-		ldx #$d0
-		ldy #$00
-		jsr $26a2
-		lda $00
-		jsr $2699
-		ldx #$08
-		jsr $262e
-		rts
-		lda #$00
-		tax
-		ldy #$02
-		sty $42
-		stx $41
-		sta $25
-		dey
-		sty $26
-		lda #$00
-		sta $10
-		lda $01
-		cmp #$0f
-		beq l22fe
-		jsr $21f1
+	rts
+	lda #$0f
+	sta $01
+	ldy #$02
+	ldx #$00
+	lda #$08
+	jsr $22e8
+	lda $00
+	ldx #$d0
+	ldy #$00
+	jsr $26a2
+	lda #$0f
+	jsr $2699
+	ldx #$08
+	jsr $262e
+	lda #$d4
+	ldy #$00
+	ldx #$d0
+	jsr $22e8
+	lda #$0f
+	sta $3a
+	lda #$d8
+	ldy #$00
+	ldx #$d4
+	jsr $22e8
+	lda #$0f
+	ldx #$d0
+	ldy #$00
+	jsr $26a2
+	lda $00
+	jsr $2699
+	ldx #$08
+	jsr $262e
+	rts
+	lda #$00
+	tax
+	ldy #$02
+	sty $42
+	stx $41
+	sta $25
+	dey
+	sty $26
+	lda #$00
+	sta $10
+	lda $01
+	cmp #$0f
+	beq l22fe
+	jsr $21f1
 l22fe:	ldy $42
-		lda $41
-		sta $11
+	lda $41
+	sta $11
 l2304:	tya
-		sta $44
-		sta ($10),y
-		lda ($10),y
-		eor $44
-		and $3a
-		beq l2314
-		jsr $253c
+	sta $44
+	sta ($10),y
+	lda ($10),y
+	eor $44
+	and $3a
+	beq l2314
+	jsr $253c
 l2314:	iny
-		bne l2304
-		inc $11
-		lda $11
-		cmp $25
-		bne l2304
-		jsr $261f
+	bne l2304
+	inc $11
+	lda $11
+	cmp $25
+	bne l2304
+	jsr $261f
 l2322:	tya
-		sta $44
-		lda ($10),y
-		eor $44
-		and $3a
-		beq l2330
-		jsr $253c
+	sta $44
+	lda ($10),y
+	eor $44
+	and $3a
+	beq l2330
+	jsr $253c
 l2330:	lda $11
-		sta ($10),y
-		lda ($10),y
-		eor $11
-		and $3a
-		beq l233f
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $11
+	and $3a
+	beq l233f
+	jsr $253c
 l233f:	iny
-		bne l2322
-		inc $11
-		lda $11
-		cmp $25
-		bne l2322
-		jsr $21f1
-		jsr $261f
-		lda #$55
-		sta $44
-		lda #$aa
-		sta $45
+	bne l2322
+	inc $11
+	lda $11
+	cmp $25
+	bne l2322
+	jsr $21f1
+	jsr $261f
+	lda #$55
+	sta $44
+	lda #$aa
+	sta $45
 l2358:	lda ($10),y
-		eor $11
-		and $3a
-		beq l2363
-		jsr $253c
+	eor $11
+	and $3a
+	beq l2363
+	jsr $253c
 l2363:	lda #$55
-		sta ($10),y
-		lda ($10),y
-		eor $44
-		and $3a
-		beq l2372
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $44
+	and $3a
+	beq l2372
+	jsr $253c
 l2372:	iny
-		lda ($10),y
-		eor $11
-		and $3a
-		beq l237e
-		jsr $253c
+	lda ($10),y
+	eor $11
+	and $3a
+	beq l237e
+	jsr $253c
 l237e:	lda #$aa
-		sta ($10),y
-		lda ($10),y
-		eor $45
-		and $3a
-		beq l238d
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $45
+	and $3a
+	beq l238d
+	jsr $253c
 l238d:	iny
-		bne l2358
-		inc $11
-		lda $11
-		cmp $25
-		bne l2358
-		jsr $261f
+	bne l2358
+	inc $11
+	lda $11
+	cmp $25
+	bne l2358
+	jsr $261f
 l239b:	lda ($10),y
-		eor $44
-		and $3a
-		beq l23a6
-		jsr $253c
+	eor $44
+	and $3a
+	beq l23a6
+	jsr $253c
 l23a6:	lda #$aa
-		sta ($10),y
-		lda ($10),y
-		eor $45
-		and $3a
-		beq l23b5
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $45
+	and $3a
+	beq l23b5
+	jsr $253c
 l23b5:	iny
-		lda ($10),y
-		eor $45
-		and $3a
-		beq l23c1
-		jsr $253c
+	lda ($10),y
+	eor $45
+	and $3a
+	beq l23c1
+	jsr $253c
 l23c1:	lda #$55
-		sta ($10),y
-		lda ($10),y
-		eor $44
-		and $3a
-		beq l23d0
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $44
+	and $3a
+	beq l23d0
+	jsr $253c
 l23d0:	iny
-		bne l239b
-		inc $11
-		lda $11
-		cmp $25
-		bne l239b
-		jsr $21f1
-		jsr $261f
-		ldx #$5a
-		stx $46
+	bne l239b
+	inc $11
+	lda $11
+	cmp $25
+	bne l239b
+	jsr $21f1
+	jsr $261f
+	ldx #$5a
+	stx $46
 l23e5:	lda ($10),y
-		eor $45
-		and $3a
-		beq l23f0
-		jsr $253c
+	eor $45
+	and $3a
+	beq l23f0
+	jsr $253c
 l23f0:	txa
-		sta ($10),y
-		lda ($10),y
-		eor $46
-		and $3a
-		beq l23fe
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $46
+	and $3a
+	beq l23fe
+	jsr $253c
 l23fe:	iny
-		lda ($10),y
-		eor $44
-		and $3a
-		beq l240a
-		jsr $253c
+	lda ($10),y
+	eor $44
+	and $3a
+	beq l240a
+	jsr $253c
 l240a:	txa
-		sta ($10),y
-		lda ($10),y
-		eor $46
-		and $3a
-		beq l2418
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $46
+	and $3a
+	beq l2418
+	jsr $253c
 l2418:	iny
-		bne l23e5
-		inc $11
-		lda $11
-		cmp $25
-		bne l23e5
-		jsr $2626
-		ldx #$5a
-		stx $44
-		ldx #$a5
-		stx $45
+	bne l23e5
+	inc $11
+	lda $11
+	cmp $25
+	bne l23e5
+	jsr $2626
+	ldx #$5a
+	stx $44
+	ldx #$a5
+	stx $45
 l242e:	lda ($10),y
-		eor $44
-		and $3a
-		beq l2439
-		jsr $253c
+	eor $44
+	and $3a
+	beq l2439
+	jsr $253c
 l2439:	txa
-		sta ($10),y
-		lda ($10),y
-		eor $45
-		and $3a
-		beq l2447
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $45
+	and $3a
+	beq l2447
+	jsr $253c
 l2447:	dey
-		cpy #$ff
-		bne l242e
-		dec $11
-		lda $11
-		cmp $41
-		bne l242e
+	cpy #$ff
+	bne l242e
+	dec $11
+	lda $11
+	cmp $41
+	bne l242e
 l2454:	lda ($10),y
-		eor $44
-		and $3a
-		beq l245f
-		jsr $253c
+	eor $44
+	and $3a
+	beq l245f
+	jsr $253c
 l245f:	txa
-		sta ($10),y
-		lda ($10),y
-		eor $45
-		and $3a
-		beq l246d
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $45
+	and $3a
+	beq l246d
+	jsr $253c
 l246d:	dey
-		cpy $26
-		bne l2454
-		jsr $21f1
-		jsr $2626
-		ldx #$5a
+	cpy $26
+	bne l2454
+	jsr $21f1
+	jsr $2626
+	ldx #$5a
 l247a:	lda ($10),y
-		eor $45
-		and $3a
-		beq l2485
-		jsr $253c
+	eor $45
+	and $3a
+	beq l2485
+	jsr $253c
 l2485:	txa
-		sta ($10),y
-		lda ($10),y
-		eor $44
-		and $3a
-		beq l2493
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $44
+	and $3a
+	beq l2493
+	jsr $253c
 l2493:	dey
-		cpy #$ff
-		bne l247a
-		dec $11
-		lda $11
-		cmp $41
-		bne l247a
+	cpy #$ff
+	bne l247a
+	dec $11
+	lda $11
+	cmp $41
+	bne l247a
 l24a0:	lda ($10),y
-		eor $45
-		and $3a
-		beq l24ab
-		jsr $253c
+	eor $45
+	and $3a
+	beq l24ab
+	jsr $253c
 l24ab:	txa
-		sta ($10),y
-		lda ($10),y
-		eor $44
-		and $3a
-		beq l24b9
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $44
+	and $3a
+	beq l24b9
+	jsr $253c
 l24b9:	dey
-		cpy $26
-		bne l24a0
-		jsr $261f
-		ldx #$ff
-		stx $46
+	cpy $26
+	bne l24a0
+	jsr $261f
+	ldx #$ff
+	stx $46
 l24c5:	lda ($10),y
-		eor $44
-		and $3a
-		beq l24d0
-		jsr $253c
+	eor $44
+	and $3a
+	beq l24d0
+	jsr $253c
 l24d0:	txa
-		sta ($10),y
-		lda ($10),y
-		eor $46
-		and $3a
-		beq l24de
-		jsr $253c
+	sta ($10),y
+	lda ($10),y
+	eor $46
+	and $3a
+	beq l24de
+	jsr $253c
 l24de:	iny
-		bne l24c5
-		inc $11
-		lda $11
-		cmp $25
-		bne l24c5
-		jsr $21f1
-		jsr $2626
-		ldx #$00
-		stx $44
-		ldx #$ff
-		stx $45
+	bne l24c5
+	inc $11
+	lda $11
+	cmp $25
+	bne l24c5
+	jsr $21f1
+	jsr $2626
+	ldx #$00
+	stx $44
+	ldx #$ff
+	stx $45
 l24f7:	txa
-		lda ($10),y
-		eor $45
-		and $3a
-		beq l2503
-		jsr $253c
+	lda ($10),y
+	eor $45
+	and $3a
+	beq l2503
+	jsr $253c
 l2503:	sta ($10),y
-		lda ($10),y
-		eor $44
-		and $3a
-		beq l2510
-		jsr $253c
+	lda ($10),y
+	eor $44
+	and $3a
+	beq l2510
+	jsr $253c
 l2510:	dey
-		cpy #$ff
-		bne l24f7
-		dec $11
-		lda $11
-		cmp $41
-		bne l24f7
+	cpy #$ff
+	bne l24f7
+	dec $11
+	lda $11
+	cmp $41
+	bne l24f7
 l251d:	txa
-		lda ($10),y
-		eor $45
-		and $3a
-		beq l2529
-		jsr $253c
+	lda ($10),y
+	eor $45
+	and $3a
+	beq l2529
+	jsr $253c
 l2529:	sta ($10),y
-		lda ($10),y
-		eor $44
-		and $3a
-		beq l2536
-		jsr $253c
+	lda ($10),y
+	eor $44
+	and $3a
+	beq l2536
+	jsr $253c
 l2536:	dey
-		cpy $26
-		bne l251d
-		rts
-		clv
-		sta $27
-		stx $28
-		sty $29
-		ldx $01
-		stx $4b
-		ldy $4b
-		cpy #$0f
-		beq l258c
-		dey
-		lda #$ff
-		sta $0015,y
-		ldy $4b
-		dey
-		lda $2822,y
-		sta $4e
-		lda $2826,y
-		sta $4f
-		ldx #$08
-		stx $49
+	cpy $26
+	bne l251d
+	rts
+	clv
+	sta $27
+	stx $28
+	sty $29
+	ldx $01
+	stx $4b
+	ldy $4b
+	cpy #$0f
+	beq l258c
+	dey
+	lda #$ff
+	sta $0015,y
+	ldy $4b
+	dey
+	lda $2822,y
+	sta $4e
+	lda $2826,y
+	sta $4f
+	ldx #$08
+	stx $49
 l2564:	lda $27
-		clc
-		rol
-		sta $27
-		bcc l256f
-		jsr $25dc
+	clc
+	rol
+	sta $27
+	bcc l256f
+	jsr $25dc
 l256f:	lda #$03
-		clc
-		adc $4e
-		sta $4e
-		bcc l257a
-		inc $4f
+	clc
+	adc $4e
+	sta $4e
+	bcc l257a
+	inc $4f
 l257a:	ldx $49
-		dex
-		stx $49
-		bne l2564
+	dex
+	stx $49
+	bne l2564
 l2581:	ldx $4b
-		stx $01
-		ldx $28
-		ldy $29
-		lda #$00
-		rts
+	stx $01
+	ldx $28
+	ldy $29
+	lda #$00
+	rts
 l258c:	lda $11
-		and #$f0
-		bne l259f
-		lda #$44
-		sta $4e
-		lda #$d3
-		sta $4f
-		jsr $25dc
-		bvc l2581
+	and #$f0
+	bne l259f
+	lda #$44
+	sta $4e
+	lda #$d3
+	sta $4f
+	jsr $25dc
+	bvc l2581
 l259f:	lda $11
-		cmp #$d4
-		bpl l25cd
-		lda $27
-		and #$f0
-		beq l25b8
-		lda #$a4
-		sta $4e
-		lda #$d2
-		sta $4f
-		lda $00
-		jsr $25de
+	cmp #$d4
+	bpl l25cd
+	lda $27
+	and #$f0
+	beq l25b8
+	lda #$a4
+	sta $4e
+	lda #$d2
+	sta $4f
+	lda $00
+	jsr $25de
 l25b8:	lda $27
-		and #$0f
-		beq l2581
-		lda #$a1
-		sta $4e
-		lda #$d2
-		sta $4f
-		lda $00
-		jsr $25de
-		bvc l2581
+	and #$0f
+	beq l2581
+	lda #$a1
+	sta $4e
+	lda #$d2
+	sta $4f
+	lda $00
+	jsr $25de
+	bvc l2581
 l25cd:	lda #$41
-		sta $4e
-		lda #$d3
-		sta $4f
-		lda $00
-		jsr $25de
-		bvc l2581
-		lda #$0f
-		sta $01
-		ldy #$00
-		lda ($4e),y
-		bmi l261e
-		lda $4e
-		sta $50
-		lda $4f
-		sta $51
-		ldx #$03
+	sta $4e
+	lda #$d3
+	sta $4f
+	lda $00
+	jsr $25de
+	bvc l2581
+	lda #$0f
+	sta $01
+	ldy #$00
+	lda ($4e),y
+	bmi l261e
+	lda $4e
+	sta $50
+	lda $4f
+	sta $51
+	ldx #$03
 l25f0:	ldy #$01
 l25f2:	lda #$a0
-		sta ($50),y
-		dey
-		bpl l25f2
-		lda #$04
-		clc
-		adc $51
-		sta $51
-		ldy #$01
+	sta ($50),y
+	dey
+	bpl l25f2
+	lda #$04
+	clc
+	adc $51
+	sta $51
+	ldy #$01
 l2602:	lda #$07
-		sta ($50),y
-		dey
-		bpl l2602
-		lda $51
-		sec
-		sbc #$04
-		sta $51
-		lda #$28
-		clc
-		adc $50
-		sta $50
-		bcc l261b
-		inc $51
+	sta ($50),y
+	dey
+	bpl l2602
+	lda $51
+	sec
+	sbc #$04
+	sta $51
+	lda #$28
+	clc
+	adc $50
+	sta $50
+	bcc l261b
+	inc $51
 l261b:	dex
-		bne l25f0
+	bne l25f0
 l261e:	rts
-		ldy $42
-		lda $41
-		sta $11
-		rts
-		ldy $25
-		dey
-		sty $11
-		ldy #$ff
-		rts
-		stx $35
-		stx $43
-		ldx $01
-		stx $4b
-		ldy #$00
-		cpy $2e
-		bne l263e
-		ldy #$02
+	ldy $42
+	lda $41
+	sta $11
+	rts
+	ldy $25
+	dey
+	sty $11
+	ldy #$ff
+	rts
+	stx $35
+	stx $43
+	ldx $01
+	stx $4b
+	ldy #$00
+	cpy $2e
+	bne l263e
+	ldy #$02
 l263e:	sty $3f
 l2640:	ldx $32
-		stx $01
-		lda ($33),y
-		ldx $2c
-		stx $01
-		sta ($2d),y
-		iny
-		bne l2640
-		inc $34
-		inc $2e
-		dec $35
-		bne l2640
-		lda $43
-		sta $35
-		lda #$00
-		sta $47
-		ldy $3f
-		lda $44
-		ora $45
-		and $45
-		bne l266b
-		ldy #$48
+	stx $01
+	lda ($33),y
+	ldx $2c
+	stx $01
+	sta ($2d),y
+	iny
+	bne l2640
+	inc $34
+	inc $2e
+	dec $35
+	bne l2640
+	lda $43
+	sta $35
+	lda #$00
+	sta $47
+	ldy $3f
+	lda $44
+	ora $45
+	and $45
+	bne l266b
+	ldy #$48
 l266b:	lda $44
-		sta $34
-		lda $45
-		sta $2e
+	sta $34
+	lda $45
+	sta $2e
 l2673:	ldx $32
-		stx $01
-		lda ($33),y
-		sta $46
-		ldx $2c
-		stx $01
-		lda ($2d),y
-		eor $46
-		ora $47
-		sta $47
-		iny
-		bne l2673
-		inc $34
-		inc $2e
-		dec $35
-		bne l2673
-		ldx $4b
-		stx $01
-		lda $47
-		rts
-		sta $32
-		stx $34
-		stx $44
-		sty $33
-		rts
-		sta $2c
-		stx $2e
-		stx $45
-		sty $2d
-		rts
-		pha
-		jsr $26b5
-		tay
-		pla
-		lsr
-		lsr
-		lsr
-		lsr
-		and #$0f
-		cmp #$0a
-		bmi l26c0
-		sec
-		sbc #$09
-		bne l26c2
+	stx $01
+	lda ($33),y
+	sta $46
+	ldx $2c
+	stx $01
+	lda ($2d),y
+	eor $46
+	ora $47
+	sta $47
+	iny
+	bne l2673
+	inc $34
+	inc $2e
+	dec $35
+	bne l2673
+	ldx $4b
+	stx $01
+	lda $47
+	rts
+	sta $32
+	stx $34
+	stx $44
+	sty $33
+	rts
+	sta $2c
+	stx $2e
+	stx $45
+	sty $2d
+	rts
+	pha
+	jsr $26b5
+	tay
+	pla
+	lsr
+	lsr
+	lsr
+	lsr
+	and #$0f
+	cmp #$0a
+	bmi l26c0
+	sec
+	sbc #$09
+	bne l26c2
 l26c0:	ora #$30
 l26c2:	rts
-		jsr $26c9
-		asl
-		asl
-		rts
-		clc
-		sta $43
-		asl
-		asl
-		adc $43
-		rts
-		inc $1b
-		lda #$d8
-		sta $37
-		lda #$20
-		sta $36
-		lda $1b
-		ldy #$00
-		sta ($36),y
-		rts
-		ldy #$ff
-		ldx #$ff
+	jsr $26c9
+	asl
+	asl
+	rts
+	clc
+	sta $43
+	asl
+	asl
+	adc $43
+	rts
+	inc $1b
+	lda #$d8
+	sta $37
+	lda #$20
+	sta $36
+	lda $1b
+	ldy #$00
+	sta ($36),y
+	rts
+	ldy #$ff
+	ldx #$ff
 l26e6:	dey
-		bne l26e6
-		dex
-		bne l26e6
-		dec $1c
-		bne l26e6
-		rts
-		lda #$72
-		sta $10
-		lda #$00
-		sta $11
-		lda #$e2
-		ldx #$28
-		ldy #$1f
-		jsr $277a
-		rts
-		lda #$62
-		sta $10
-		lda #$00
-		sta $11
-		lda #$1a
-		ldx #$29
-		ldy #$0f
-		jsr $277a
-		rts
-		lda #$52
-		sta $10
-		lda #$00
-		sta $11
-		lda #$0a
-		ldx #$29
-		ldy #$0f
-		jsr $277a
-		rts
-		lda #$92
-		sta $10
-		lda #$00
-		sta $11
-		lda #$02
-		ldx #$29
-		ldy #$07
-		jsr $277a
-		rts
-		lda #$52
-		sta $10
-		lda #$00
-		sta $11
-		lda #$a8
-		ldx #$28
-		ldy #$39
-		jsr $277a
-		rts
-		lda #$f0
-		sta $fffa
-		lda #$00
-		sta $fffb
-		lda #$f2
-		sta $fffc
-		lda #$00
-		sta $fffd
-		lda #$f4
-		sta $fffe
-		lda #$00
-		sta $ffff
-		lda #$f0
-		sta $f0
-		sta $f2
-		sta $f4
-		lda #$21
-		sta $f1
-		sta $f3
-		sta $f5
-		rts
-		sta $4e
-		stx $4f
-		lda $00
-		sta $01
+	bne l26e6
+	dex
+	bne l26e6
+	dec $1c
+	bne l26e6
+	rts
+	lda #$72
+	sta $10
+	lda #$00
+	sta $11
+	lda #$e2
+	ldx #$28
+	ldy #$1f
+	jsr $277a
+	rts
+	lda #$62
+	sta $10
+	lda #$00
+	sta $11
+	lda #$1a
+	ldx #$29
+	ldy #$0f
+	jsr $277a
+	rts
+	lda #$52
+	sta $10
+	lda #$00
+	sta $11
+	lda #$0a
+	ldx #$29
+	ldy #$0f
+	jsr $277a
+	rts
+	lda #$92
+	sta $10
+	lda #$00
+	sta $11
+	lda #$02
+	ldx #$29
+	ldy #$07
+	jsr $277a
+	rts
+	lda #$52
+	sta $10
+	lda #$00
+	sta $11
+	lda #$a8
+	ldx #$28
+	ldy #$39
+	jsr $277a
+	rts
+	lda #$f0
+	sta $fffa
+	lda #$00
+	sta $fffb
+	lda #$f2
+	sta $fffc
+	lda #$00
+	sta $fffd
+	lda #$f4
+	sta $fffe
+	lda #$00
+	sta $ffff
+	lda #$f0
+	sta $f0
+	sta $f2
+	sta $f4
+	lda #$21
+	sta $f1
+	sta $f3
+	sta $f5
+	rts
+	sta $4e
+	stx $4f
+	lda $00
+	sta $01
 l2782:	lda ($4e),y
-		sta ($10),y
-		dey
-		bpl l2782
-		rts
-		jmp $204f
-		eor ($44,x)
-		!byte $52
-		jsr $5942
-		!byte $54
-		eor $20
-		!byte $54
-		eor $53
-		!byte $54
-		jsr $4948
-		jsr $4441
-		!byte $52
-		jsr $5942
-		!byte $54
-		eor $20
-		!byte $54
-		eor $53
-		!byte $54
-		jsr $4843
-		!byte $4b
-		!byte $52
-		!byte $42
-		!byte $52
-		!byte $44
-		jsr $3524
-		and $2c,x
-		jsr $4124
-		eor ($20,x)
-		eor ($41,x)
-		bit $2420
-		and $35,x
-		jsr $414d
-		!byte $52
-		!byte $43
-		pha
-		jsr $4e49
-		!byte $43
-		jsr $4441
-		!byte $52
-		jsr $3524
-		eor ($20,x)
-		!byte $44
-		eor $43
-		jsr $4441
-		!byte $52
-		jsr $4124
-		and $20,x
-		and $41,x
-		jsr $4e49
-		!byte $43
-		jsr $4441
-		!byte $52
-		jsr $4624
-		lsr $20
-		!byte $44
-		eor $43
-		jsr $4441
-		!byte $52
+	sta ($10),y
+	dey
+	bpl l2782
+	rts
+	jmp $204f
+	eor ($44,x)
+	!byte $52
+	jsr $5942
+	!byte $54
+	eor $20
+	!byte $54
+	eor $53
+	!byte $54
+	jsr $4948
+	jsr $4441
+	!byte $52
+	jsr $5942
+	!byte $54
+	eor $20
+	!byte $54
+	eor $53
+	!byte $54
+	jsr $4843
+	!byte $4b
+	!byte $52
+	!byte $42
+	!byte $52
+	!byte $44
+	jsr $3524
+	and $2c,x
+	jsr $4124
+	eor ($20,x)
+	eor ($41,x)
+	bit $2420
+	and $35,x
+	jsr $414d
+	!byte $52
+	!byte $43
+	pha
+	jsr $4e49
+	!byte $43
+	jsr $4441
+	!byte $52
+	jsr $3524
+	eor ($20,x)
+	!byte $44
+	eor $43
+	jsr $4441
+	!byte $52
+	jsr $4124
+	and $20,x
+	and $41,x
+	jsr $4e49
+	!byte $43
+	jsr $4441
+	!byte $52
+	jsr $4624
+	lsr $20
+	!byte $44
+	eor $43
+	jsr $4441
+	!byte $52
 l27f9:	jsr $3024
-		bmi l281e
-		!byte $53
-		!byte $54
-		eor ($54,x)
-		eor #$43
-		jsr $4152
-		eor $5420
-		eor $53
-		!byte $54
-		!byte $53
-		jsr $3620
-		and $32,x
-		rol $20,x
-		!byte $54
-		eor #$4d
-		eor $52
-		!byte $53
-		jsr $4554
+	bmi l281e
+	!byte $53
+	!byte $54
+	eor ($54,x)
+	eor #$43
+	jsr $4152
+	eor $5420
+	eor $53
+	!byte $54
+	!byte $53
+	jsr $3620
+	and $32,x
+	rol $20,x
+	!byte $54
+	eor #$4d
+	eor $52
+	!byte $53
+	jsr $4554
 l281e:	!byte $53
-		!byte $54
-		!byte $53
-		jsr $49a9
-		cmp ($89,x)
-		bne l27f9
-		cmp ($d2),y
-		jsr $202a
-		rol
-		jsr $4220
-		eor ($44,x)
-		jsr $5250
-		!byte $4f
-		!byte $47
-		!byte $52
-		eor ($4d,x)
-		jsr $4843
-		eor $43
-		!byte $4b
-		!byte $53
-		eor $4d,x
+	!byte $54
+	!byte $53
+	jsr $49a9
+	cmp ($89,x)
+	bne l27f9
+	cmp ($d2),y
+	jsr $202a
+	rol
+	jsr $4220
+	eor ($44,x)
+	jsr $5250
+	!byte $4f
+	!byte $47
+	!byte $52
+	eor ($4d,x)
+	jsr $4843
+	eor $43
+	!byte $4b
+	!byte $53
+	eor $4d,x
 l2844:	jsr $2a20
-		jsr $202a
-		brk
-		cld
-		ora ($d8,x)
-		!byte $02
-		cld
-		!byte $03
-		cld
-		!byte $04
-		cld
-		ora $d8
-		asl $d8
-		!byte $07
-		cld
-		php
-		cld
-		ora #$d8
-		asl
-		cld
-		!byte $0b
-		cld
-		!byte $0c
-		cld
-		ora $0ed8
-		cld
-		!byte $0f
-		cld
-		bpl l2844
-		ora ($d8),y
-		!byte $12
-		cld
-		!byte $13
-		cld
-		!byte $14
-		cld
-		ora $d8,x
-		asl $d8,x
-		!byte $17
-		cld
-		clc
-		cld
-		ora $1ad8,y
-		cld
-		!byte $1b
-		cld
-		!byte $1c
-		cld
-		ora $1ed8,x
-		cld
-		!byte $1f
-		cld
-		jsr $21d8
-		cld
-		!byte $22
-		cld
-		!byte $23
-		cld
-		bit $d8
-		and $d8
-		rol $d8
-		!byte $27
-		cld
-		plp
-		cld
-		and #$d8
-		rol
-		cld
-		!byte $2b
-		cld
-		bit $2dd8
-		cld
-		rol $00d8
-		!byte $da
-		ora ($da,x)
-		!byte $02
-		!byte $da
-		!byte $03
-		!byte $da
-		!byte $04
-		!byte $da
-		ora $da
-		asl $da
-		!byte $07
-		!byte $da
-		php
-		!byte $da
-		ora #$da
-		asl
-		!byte $da
-		!byte $0b
-		!byte $da
-		!byte $0c
-		!byte $da
-		ora $0eda
-		!byte $da
-		!byte $0f
-		!byte $da
-		bpl l28a4
-		ora ($da),y
-		!byte $12
-		!byte $da
-		!byte $13
-		!byte $da
-		!byte $14
-		!byte $da
-		ora $da,x
-		asl $da,x
-		!byte $17
-		!byte $da
-		clc
-		!byte $da
-		ora $1ada,y
-		!byte $da
-		!byte $1b
-		!byte $da
-		!byte $1c
-		!byte $da
-		brk
-		!byte $dc
-		ora ($dc,x)
-		!byte $02
-		!byte $dc
-		!byte $03
-		!byte $dc
-		!byte $04
-		!byte $dc
-		ora $dc
-		asl $dc
-		!byte $07
-		!byte $dc
-		php
-		!byte $dc
-		ora #$dc
-		asl
-		!byte $dc
-		!byte $0b
-		!byte $dc
-		!byte $0c
-		!byte $dc
-		ora $0edc
-		!byte $dc
-		!byte $0f
-		!byte $dc
-		brk
-		cmp $dd01,x
-		!byte $02
-		cmp $dd03,x
-		brk
-		dec $de01,x
-		!byte $02
-		dec $de03,x
-		!byte $04
-		dec $de05,x
-		asl $de
-		!byte $07
-		dec $df00,x
-		ora ($df,x)
-		!byte $02
-		!byte $df
-		!byte $03
-		!byte $df
-		!byte $04
-		!byte $df
-		ora $df
-		asl $df
-		!byte $07
-		!byte $df
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		tax
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $6520
-		bpl l3013
-		!byte $14
-		jsr $0909
-		jsr $0904
-		ora ($07,x)
-		asl $130f
-		!byte $14
-		ora #$03
-		!byte $67
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		!byte $63
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		!byte $4f
-		bvc l30cc
-		!byte $4f
-		bvc l30cf
-		!byte $4f
-		bvc l30d2
-		!byte $4f
-		bvc l30d5
-		!byte $4f
-		bvc l30d8
-		!byte $4f
-		bvc l30db
-		!byte $4f
-		bvc l30de
-		!byte $4f
-		bvc l30e1
-		!byte $4f
-		bvc l30e4
-		!byte $4f
-		bvc l30e7
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $4c20
-		!byte $7a
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $3320
-		!byte $33
-		jsr $3433
-		jsr $3533
-		jsr $3633
-		jsr $3733
-		jsr $3833
-		jsr $3933
-		jsr $3034
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $4f20
-		bvc l316c
-		!byte $4f
-		bvc l316f
-		!byte $4f
-		bvc l3172
-		!byte $4f
-		bvc l3175
-		!byte $4f
-		bvc l3178
-		!byte $4f
-		bvc l317b
-		!byte $4f
-		bvc l317e
-		!byte $4f
-		bvc l3181
-		!byte $4f
-		bvc l3184
-		!byte $4f
-		bvc l3187
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $4c20
-		!byte $7a
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $3420
-		and ($20),y
-		!byte $34
-		!byte $32
-		jsr $3334
-		jsr $3434
-		jsr $3534
-		jsr $3634
-		jsr $3734
-		jsr $3834
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $4f20
-		bvc l320c
-		!byte $4f
-		bvc l320f
-		!byte $4f
-		bvc l3212
-		!byte $4f
-		bvc l3215
-		!byte $4f
-		bvc l3218
-		!byte $4f
-		bvc l321b
-		!byte $4f
-		bvc l321e
-		!byte $4f
-		bvc l3221
-		!byte $4f
-		bvc l3224
-		!byte $4f
-		bvc l3227
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $4c20
-		!byte $7a
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $3520
-		sec
-		jsr $3935
-		jsr $3036
-		jsr $3136
-		jsr $3236
-		jsr $3336
-		jsr $3436
-		jsr $3536
-		jsr $3637
-		jsr $3238
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $4f20
-		bvc l32ac
-		!byte $4f
-		bvc l32af
-		!byte $4f
-		bvc l32b2
-		!byte $4f
-		bvc l32b5
-		!byte $4f
-		bvc l32b8
-		!byte $4f
-		bvc l32bb
-		!byte $4f
-		bvc l32be
-		!byte $4f
-		bvc l32c1
-		!byte $4f
-		bvc l32c4
-		!byte $4f
-		bvc l32c7
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $4c20
-		!byte $7a
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $3620
-		rol $20,x
-		rol $37,x
-		jsr $3836
-		jsr $3936
-		jsr $3037
-		jsr $3137
-		jsr $3237
-		jsr $3337
-		jsr $3437
-		jsr $3537
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $4f20
-		bvc l334c
-		!byte $4f
-		bvc l334f
-		!byte $4f
-		bvc l3352
-		!byte $4f
-		bvc l3355
-		!byte $4f
-		bvc l3358
-		!byte $4f
-		bvc l335b
-		!byte $4f
-		bvc l335e
-		!byte $4f
-		bvc l3361
-		!byte $4f
-		bvc l3364
-		!byte $4f
-		bvc l3367
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $6a74
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $4c20
-		!byte $7a
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $7a4c
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $3820
-		!byte $33
-		jsr $3438
-		jsr $3430
-		jsr $3931
-		jsr $3032
-		jsr $3218
-		jsr $3230
-		jsr $3332
-		jsr $3432
-		jsr $3538
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		brk
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $2020
-		jsr $0020
+	jsr $202a
+	brk
+	cld
+	ora ($d8,x)
+	!byte $02
+	cld
+	!byte $03
+	cld
+	!byte $04
+	cld
+	ora $d8
+	asl $d8
+	!byte $07
+	cld
+	php
+	cld
+	ora #$d8
+	asl
+	cld
+	!byte $0b
+	cld
+	!byte $0c
+	cld
+	ora $0ed8
+	cld
+	!byte $0f
+	cld
+	bpl l2844
+	ora ($d8),y
+	!byte $12
+	cld
+	!byte $13
+	cld
+	!byte $14
+	cld
+	ora $d8,x
+	asl $d8,x
+	!byte $17
+	cld
+	clc
+	cld
+	ora $1ad8,y
+	cld
+	!byte $1b
+	cld
+	!byte $1c
+	cld
+	ora $1ed8,x
+	cld
+	!byte $1f
+	cld
+	jsr $21d8
+	cld
+	!byte $22
+	cld
+	!byte $23
+	cld
+	bit $d8
+	and $d8
+	rol $d8
+	!byte $27
+	cld
+	plp
+	cld
+	and #$d8
+	rol
+	cld
+	!byte $2b
+	cld
+	bit $2dd8
+	cld
+	rol $00d8
+	!byte $da
+	ora ($da,x)
+	!byte $02
+	!byte $da
+	!byte $03
+	!byte $da
+	!byte $04
+	!byte $da
+	ora $da
+	asl $da
+	!byte $07
+	!byte $da
+	php
+	!byte $da
+	ora #$da
+	asl
+	!byte $da
+	!byte $0b
+	!byte $da
+	!byte $0c
+	!byte $da
+	ora $0eda
+	!byte $da
+	!byte $0f
+	!byte $da
+	bpl l28a4
+	ora ($da),y
+	!byte $12
+	!byte $da
+	!byte $13
+	!byte $da
+	!byte $14
+	!byte $da
+	ora $da,x
+	asl $da,x
+	!byte $17
+	!byte $da
+	clc
+	!byte $da
+	ora $1ada,y
+	!byte $da
+	!byte $1b
+	!byte $da
+	!byte $1c
+	!byte $da
+	brk
+	!byte $dc
+	ora ($dc,x)
+	!byte $02
+	!byte $dc
+	!byte $03
+	!byte $dc
+	!byte $04
+	!byte $dc
+	ora $dc
+	asl $dc
+	!byte $07
+	!byte $dc
+	php
+	!byte $dc
+	ora #$dc
+	asl
+	!byte $dc
+	!byte $0b
+	!byte $dc
+	!byte $0c
+	!byte $dc
+	ora $0edc
+	!byte $dc
+	!byte $0f
+	!byte $dc
+	brk
+	cmp $dd01,x
+	!byte $02
+	cmp $dd03,x
+	brk
+	dec $de01,x
+	!byte $02
+	dec $de03,x
+	!byte $04
+	dec $de05,x
+	asl $de
+	!byte $07
+	dec $df00,x
+	ora ($df,x)
+	!byte $02
+	!byte $df
+	!byte $03
+	!byte $df
+	!byte $04
+	!byte $df
+	ora $df
+	asl $df
+	!byte $07
+	!byte $df
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	tax
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $6520
+	bpl l3013
+	!byte $14
+	jsr $0909
+	jsr $0904
+	ora ($07,x)
+	asl $130f
+	!byte $14
+	ora #$03
+	!byte $67
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	!byte $63
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	!byte $4f
+	bvc l30cc
+	!byte $4f
+	bvc l30cf
+	!byte $4f
+	bvc l30d2
+	!byte $4f
+	bvc l30d5
+	!byte $4f
+	bvc l30d8
+	!byte $4f
+	bvc l30db
+	!byte $4f
+	bvc l30de
+	!byte $4f
+	bvc l30e1
+	!byte $4f
+	bvc l30e4
+	!byte $4f
+	bvc l30e7
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $4c20
+	!byte $7a
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $3320
+	!byte $33
+	jsr $3433
+	jsr $3533
+	jsr $3633
+	jsr $3733
+	jsr $3833
+	jsr $3933
+	jsr $3034
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $4f20
+	bvc l316c
+	!byte $4f
+	bvc l316f
+	!byte $4f
+	bvc l3172
+	!byte $4f
+	bvc l3175
+	!byte $4f
+	bvc l3178
+	!byte $4f
+	bvc l317b
+	!byte $4f
+	bvc l317e
+	!byte $4f
+	bvc l3181
+	!byte $4f
+	bvc l3184
+	!byte $4f
+	bvc l3187
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $4c20
+	!byte $7a
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $3420
+	and ($20),y
+	!byte $34
+	!byte $32
+	jsr $3334
+	jsr $3434
+	jsr $3534
+	jsr $3634
+	jsr $3734
+	jsr $3834
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $4f20
+	bvc l320c
+	!byte $4f
+	bvc l320f
+	!byte $4f
+	bvc l3212
+	!byte $4f
+	bvc l3215
+	!byte $4f
+	bvc l3218
+	!byte $4f
+	bvc l321b
+	!byte $4f
+	bvc l321e
+	!byte $4f
+	bvc l3221
+	!byte $4f
+	bvc l3224
+	!byte $4f
+	bvc l3227
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $4c20
+	!byte $7a
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $3520
+	sec
+	jsr $3935
+	jsr $3036
+	jsr $3136
+	jsr $3236
+	jsr $3336
+	jsr $3436
+	jsr $3536
+	jsr $3637
+	jsr $3238
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $4f20
+	bvc l32ac
+	!byte $4f
+	bvc l32af
+	!byte $4f
+	bvc l32b2
+	!byte $4f
+	bvc l32b5
+	!byte $4f
+	bvc l32b8
+	!byte $4f
+	bvc l32bb
+	!byte $4f
+	bvc l32be
+	!byte $4f
+	bvc l32c1
+	!byte $4f
+	bvc l32c4
+	!byte $4f
+	bvc l32c7
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $4c20
+	!byte $7a
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $3620
+	rol $20,x
+	rol $37,x
+	jsr $3836
+	jsr $3936
+	jsr $3037
+	jsr $3137
+	jsr $3237
+	jsr $3337
+	jsr $3437
+	jsr $3537
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $4f20
+	bvc l334c
+	!byte $4f
+	bvc l334f
+	!byte $4f
+	bvc l3352
+	!byte $4f
+	bvc l3355
+	!byte $4f
+	bvc l3358
+	!byte $4f
+	bvc l335b
+	!byte $4f
+	bvc l335e
+	!byte $4f
+	bvc l3361
+	!byte $4f
+	bvc l3364
+	!byte $4f
+	bvc l3367
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $6a74
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $4c20
+	!byte $7a
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $7a4c
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $3820
+	!byte $33
+	jsr $3438
+	jsr $3430
+	jsr $3931
+	jsr $3032
+	jsr $3218
+	jsr $3230
+	jsr $3332
+	jsr $3432
+	jsr $3538
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	brk
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $2020
+	jsr $0020

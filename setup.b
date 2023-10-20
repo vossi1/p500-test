@@ -5,12 +5,12 @@
 !to "setup.prg", cbm 
 
 *= $d000
-	lda #$04							; $d001 will be set from basic loader
-	sta $00								; set code bank
+	lda #$04			; $d001 will be set from basic loader
+	sta $00				; set code bank
 	nop
 	nop
 	nop
 	nop
-	jmp $2000							; jump to main code
+	jmp $2000			; jump to main code
 
 !byte $aa, $aa, $aa, $aa
