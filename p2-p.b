@@ -64,9 +64,23 @@ VOLUME			= $18 *2	; volume
 !addr VIC		= $d800		; VIC register
 ; ***************************************** ZERO PAGE *********************************************
 !addr pointer1		= $10		; 16bit pointer
+!addr tod_count1	= $12		; tod test counter
+!addr tod_count2	= $13		; tod test counter
+!addr cia_tmr_fail	= $14		; 0 = timer ok, $ff = timer failed
+!addr cia_tod_fail	= $15		; 0 = TOD ok, $ff = tod failed
+!addr tod_state		= $16		; TOD state - $ff = bad
+;			= $16		; ******** timer count
+!addr time2_hours	= $17		; time 1 hours
+!addr time2_minutes	= $18		; time 1 minutes
+!addr time2_seconds	= $19		; time 1 seconds
+!addr time2_10th	= $1a		; time 1 10th seconds
 !addr ext_color		= $1b		; exterior color
 !addr delaycounter	= $1c		; 8bit counter for delay loop
-!addr cycles		= $21		; cycles-$24 = cycles counter decimal for 8 digits
+!addr time1_hours	= $1d		; time 1 hours
+!addr time1_minutes	= $1e		; time 1 minutes
+!addr time1_seconds	= $1f		; time 1 seconds
+!addr time1_10th	= $20		; time 1 10th seconds
+!addr cycles		= $21 ; - $24	; cycles counter decimal for 8 digits
 !addr test_pages	= $25		; pages to test
 !addr temp2		= $26		; temp variable
 !addr faulty_bits	= $27		; faulty test bits
@@ -91,17 +105,14 @@ VOLUME			= $18 *2	; volume
 !addr temp5		= $49		; temp variable
 !addr banks_counter	= $4a		; counter for banks to test in a cycle
 !addr temp_bank		= $4b		; temp bank variable
+!addr tod_count3	= $4c		; tod test counter
 !addr pointer2		= $4e		; 16bit pointer
 !addr pointer3		= $50		; 16bit pointer
-!addr sid		= $52		; SID register table -$91
+!addr sid		= $52 ; -$91	; SID register table
 !addr tpi1		= $52		; TPI1 register table - unused -
 !addr tpi2		= $62		; TPI2 register table - unused -
-!addr cia		= $92		; CIA register table -$b1
+!addr cia		= $92 ; -$b1	; CIA register table
 !addr acia		= $92		; ACIA register table - unused -
-; ****************************************** MACROS ***********************************************
-!macro WriteSID .r{			; *** set SID Register
-	sta(sid + 2*.r),y	; writes data in A to SID via pointer table
-}
 ; ***************************************** ZONE MAIN *********************************************
 !zone main
 !initmem FILL
@@ -320,8 +331,6 @@ Main:
 	jsr PlaySound			; play sound
 	jsr SetExteriorColor		; increase exterior color after each cycle
 	jsr TODTest			; tod test				********** EXTENDED **********
-	jsr CopySIDTable		; init sid pointer
-	jsr PlaySound			; play sound	
 	jsr DummySub			; Call 19x dummy-subroutine
 	jsr DummySub
 	jsr DummySub
@@ -433,13 +442,12 @@ PlaySound:
 eciairq:ldy #$00
 	lda #$7f			; clear all irq mask bits
 	sta (cia+ICR),y
-; clear CIA inerrupt reg
+; clear CIA interrupt reg
 cciairq:ldy #$00
 	lda (cia+ICR),y			; clear irq reg
 	rts
-	rti				; unused
 ; ----------------------------------------------------------------------------
-; TOD tests
+; TOD tests		; ********* added by Vossi **********
 TODTest:
 	sei				; disable interrupts (ALARM test checks reg)
 ;	ldx #$35			; "6526 TOD TESTS"
@@ -467,7 +475,7 @@ chk10lp:lda time2_10th
 	bne todfai1			; branch -> TOD failure
 	lda time2_seconds
 	beq chk10lp			; check all 10th
-	jsr playsnd			; play sound after 1 second
+	jsr PlaySound			; play sound after 1 second
 ; test last 10th increases a second
 	lda #$09
 	sta time1_10th
@@ -478,7 +486,7 @@ chkslp: lda time2_seconds
 	bne todfai1
 	lda time2_minutes
 	beq chkslp			; check all seconds
-	jsr playsnd
+	jsr PlaySound
 ; test minutes change
 	lda #$59
 	sta time1_seconds
@@ -490,7 +498,7 @@ chkmlp:	lda time2_minutes
 	lda time2_hours
 	cmp #$01
 	beq chkmlp			; check all minutes
-	jsr playsnd
+	jsr PlaySound
 ; test hours change
 	lda #$59
 	sta time1_minutes
@@ -541,18 +549,17 @@ chkalar:cmp #$04			; test ALARM irq bit
 ; tod fails
 todfail:lda #$ff
 	sta cia_tod_fail		; remember tod failed
-	lda #$bf
-	sta pointer3
-	lda #$d5
-	sta pointer3+1
-	jsr drawbad			; draw chip BAD
-	lda cia_tmr_fail
-	bne todend			; skip if timer already failed 
-	ldx #$33			; "TOD"
-	bne drawtod			; jump always -> draw text
-; unused - never reachable
-	ldx #$34			; "TNT"
-drawtod:jsr drawtxt			; sub: draw screen text
+	lda #$3b
+	sta pointer2
+	lda #$d3
+	sta pointer2+1			; set screen pointer to color RAM
+	lda CodeBank
+	jsr ColorFaultyChip		; color 6526 U02 - V=0 if already colored
+;	lda cia_tmr_fail
+;	bne todend			; skip if timer already failed 
+;	ldx #$33			; "TOD"
+;	bne drawtod			; jump always -> draw text
+;drawtod:jsr drawtxt			; sub: draw screen text
 todend:	rts
 ; ----------------------------------------------------------------------------
 ; set TOD to time1 and set time2 = time1 + one 10th
