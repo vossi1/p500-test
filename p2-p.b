@@ -11,9 +11,11 @@
 ; fix08	- cycles counter line1 for 8 digits space
 ; fix09 - removed untested chip-numbers - small fix: adr errorbar bank 3 lobyte wrong
 ; first final 1.0
+; added TOD-Test 1.1
 !cpu 6502
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 ; switches
+;VICE = 1	; 2 Rambanks for Vice (RAM detection doesn't work properly in Vice)
 ;ROM = 0	; assemble extension rom
 !ifdef 	ROM{!to "p2-p.bin", plain
 } else{ 	!to "p2-p.prg", cbm }
@@ -250,9 +252,12 @@ findram:stx IndirectBank		; switch to indirect bank 0
 noram:	inx				; increase bank
 	cpx #$0f			; check if last possible RAM bank	orig. $04 ********* PATCHED *********
 	bne findram			; search next RAM bank
-;	lda last_rambank		; load RAM banks
-	lda #2	; **************************************
-	sta last_rambank ; ***************************************
+!ifdef VICE{
+	lda #2			; ********* 2 Rambanks for Vice *********
+	sta last_rambank
+} else{
+	lda last_rambank		; load RAM banks
+}
 ; write found banks to screen
 	jsr Hex2Screencode		; sub: calc screencode digits for byte in A to AY
 	lda #$09			; pointer to $d009
@@ -459,7 +464,7 @@ TODTest:
 ;	ldx #$35			; "6526 TOD TESTS"
 ;	jsr drawtxt			; sub: draw screen text
 	jsr InitCIAPointer		; init cia pointer
-;	jsr eciairq			; enable cia irq's
+	jsr eciairq			; enable cia irq's
 	ldy #$00
 	sty tod_state			; init TOD state to 0 = ok
 	lda #SYSTEMBANK
@@ -526,10 +531,6 @@ chkh12:	cmp #$12
 	lda tod_state			; load state
 todfai1:bne todfail			; branch -> TOD failure
 ; TOD alarm test
-
-	jmp todend ; **************************************************************************
-
-
 	lda (cia+ICR),y			; clear cia irq reg
 	lda #$7f
 	sta (cia+ICR),y			; clear all irq mask bits
@@ -1655,7 +1656,7 @@ ScreenData:
 	!byte $4c, $7a, $20, $4c, $7a, $20, $4c, $7a
 	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $20
 
-	!scr "vers 1.0"
+	!scr "vers 1.1"
 ;	!byte $20, $38, $33, $20, $38, $34, $20, $30
 ;	!byte $34, $20, $31, $39, $20, $32, $30, $20
 ;	!byte $18, $32, $20, $30, $32, $20, $32, $33
