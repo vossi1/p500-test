@@ -11,3 +11,4 @@ fix06 - use all three SID voices
 fix07 - test bank counter
 fix08 - cycles counter line1 for 8 digits space
 fix09 - removed untested chip-numbers
+v1.0  - first final release
