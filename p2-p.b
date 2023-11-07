@@ -17,6 +17,8 @@
 ;ROM = 0	; assemble extension rom
 !ifdef 	ROM{!to "p2-p.bin", plain
 } else{ 	!to "p2-p.prg", cbm }
+; ***************************************** IMPORTANT *********************************************
+CODESIZE		= $30		; Codesize to copy from bank to bank !!!
 ; ***************************************** CONSTANTS *********************************************
 FILL			= $aa		; fills free memory areas with $aa
 SYSTEMBANK		= $0f		; systembank
@@ -64,22 +66,10 @@ VOLUME			= $18 *2	; volume
 !addr VIC		= $d800		; VIC register
 ; ***************************************** ZERO PAGE *********************************************
 !addr pointer1		= $10		; 16bit pointer
-!addr tod_count1	= $12		; tod test counter
-!addr tod_count2	= $13		; tod test counter
-!addr cia_tmr_fail	= $14		; 0 = timer ok, $ff = timer failed
-!addr cia_tod_fail	= $15		; 0 = TOD ok, $ff = tod failed
-!addr tod_state		= $16		; TOD state - $ff = bad
-;			= $16		; ******** timer count
-!addr time2_hours	= $17		; time 1 hours
-!addr time2_minutes	= $18		; time 1 minutes
-!addr time2_seconds	= $19		; time 1 seconds
-!addr time2_10th	= $1a		; time 1 10th seconds
+!addr bank_state	= $15 ; - $??	; bank faulty state
+!addr bank_state_full	= $0015
 !addr ext_color		= $1b		; exterior color
 !addr delaycounter	= $1c		; 8bit counter for delay loop
-!addr time1_hours	= $1d		; time 1 hours
-!addr time1_minutes	= $1e		; time 1 minutes
-!addr time1_seconds	= $1f		; time 1 seconds
-!addr time1_10th	= $20		; time 1 10th seconds
 !addr cycles		= $21 ; - $24	; cycles counter decimal for 8 digits
 !addr test_pages	= $25		; pages to test
 !addr temp2		= $26		; temp variable
@@ -93,10 +83,10 @@ VOLUME			= $18 *2	; volume
 !addr copy_source	= $33		; 16bit copy source address
 !addr counter		= $35		; counter
 !addr color_pointer	= $36		; 16bit colorpointer
-!addr test_mask		= $3a		; test mask (to test only 4 bit in color RAM)		
+!addr test_mask		= $3a		; test mask (to test only 4 bit in color RAM)	
+!addr temp6		= $3f		; temp6	
 !addr start_high	= $41		; test start address highbyte	
 !addr start_low		= $42		; test start address lowbyte	
-!addr start_high	= $41		; test start address highbyte	
 !addr temp1		= $43		; temp variable
 !addr temp3		= $44		; temp variable
 !addr temp4		= $45		; temp variable
@@ -105,7 +95,6 @@ VOLUME			= $18 *2	; volume
 !addr temp5		= $49		; temp variable
 !addr banks_counter	= $4a		; counter for banks to test in a cycle
 !addr temp_bank		= $4b		; temp bank variable
-!addr tod_count3	= $4c		; tod test counter
 !addr pointer2		= $4e		; 16bit pointer
 !addr pointer3		= $50		; 16bit pointer
 !addr sid		= $52 ; -$91	; SID register table
@@ -113,14 +102,30 @@ VOLUME			= $18 *2	; volume
 !addr tpi2		= $62		; TPI2 register table - unused -
 !addr cia		= $92 ; -$b1	; CIA register table
 !addr acia		= $92		; ACIA register table - unused -
+
+!addr time1_hours	= $f0		; time 1 hours
+!addr time1_minutes	= $f1		; time 1 minutes
+!addr time1_seconds	= $f2		; time 1 seconds
+!addr time1_10th	= $f3		; time 1 10th seconds
+!addr time2_hours	= $f4		; time 2 hours
+!addr time2_minutes	= $f5		; time 2 minutes
+!addr time2_seconds	= $f6		; time 2 seconds
+!addr time2_10th	= $f7		; time 2 10th seconds
+!addr tod_count1	= $f8		; tod test counter
+!addr tod_count2	= $f9		; tod test counter
+!addr tod_count3	= $fa		; tod test counter
+!addr tod_state		= $fb		; TOD state - $ff = bad
+!addr cia_tod_fail	= $fc		; 0 = TOD ok, $ff = tod failed
+!addr cia_tmr_fail	= $fd		; 0 = timer ok, $ff = timer failed
 ; ***************************************** ZONE MAIN *********************************************
 !zone main
 !initmem FILL
 *= $2000
-	jmp start			; jump to start
-	jmp start			; jump to start
+	jmp Start			; jump to start
+	jmp Start			; jump to start
 	!byte $c3,$c2,$cd,"2"		; cbm-rom ident-bytes 'C'= with init, 'BM', '2' = 4k-block 2
-start:	sei				; disable interrupts
+Start:	
+	sei				; disable interrupts
 	cld				; clear decimal flag
 	ldx #$ff
 	txs				; reset stack pointer
@@ -245,7 +250,9 @@ findram:stx IndirectBank		; switch to indirect bank 0
 noram:	inx				; increase bank
 	cpx #$0f			; check if last possible RAM bank	orig. $04 ********* PATCHED *********
 	bne findram			; search next RAM bank
-	lda last_rambank		; load RAM banks 		
+;	lda last_rambank		; load RAM banks
+	lda #2	; **************************************
+	sta last_rambank ; ***************************************
 ; write found banks to screen
 	jsr Hex2Screencode		; sub: calc screencode digits for byte in A to AY
 	lda #$09			; pointer to $d009
@@ -325,7 +332,7 @@ FillColor:
 ; ----------------------------------------------------------------------------
 ; Main loop
 Main:	
-	jsr CopySIDTable		; init sid pointer
+	jsr InitSIDPointer		; init sid pointer
 	lda #SYSTEMBANK
 	sta IndirectBank		; switch to bank 15
 	jsr PlaySound			; play sound
@@ -396,10 +403,9 @@ mprtdig:lda cycles,x			; load digit again
 ; Dummy subroutine
 DummySub:
 	rts
-	rti
 ; ----------------------------------------------------------------------------
 ; play sound
-PlaySound:	
+PlaySound:
 	ldy #$00			; clear Y for indirect writes
 	lda IndirectBank
 	sta temp_bank			; remember target bank
@@ -452,8 +458,8 @@ TODTest:
 	sei				; disable interrupts (ALARM test checks reg)
 ;	ldx #$35			; "6526 TOD TESTS"
 ;	jsr drawtxt			; sub: draw screen text
-	jsr CopyCIATable		; init cia pointer
-	jsr eciairq			; enable cia irq's
+	jsr InitCIAPointer		; init cia pointer
+;	jsr eciairq			; enable cia irq's
 	ldy #$00
 	sty tod_state			; init TOD state to 0 = ok
 	lda #SYSTEMBANK
@@ -470,7 +476,7 @@ TODTest:
 ; test 10x 10th change in first second
 chk10lp:lda time2_10th
 	sta time1_10th			; copy 10th to time2
-	jsr todchk1			; check if TOD increases one 10th
+	jsr TODCheck			; check if TOD increases one 10th
 	lda tod_state
 	bne todfai1			; branch -> TOD failure
 	lda time2_seconds
@@ -481,7 +487,7 @@ chk10lp:lda time2_10th
 	sta time1_10th
 chkslp: lda time2_seconds
 	sta time1_seconds
-	jsr todchk1
+	jsr TODCheck
 	lda tod_state
 	bne todfai1
 	lda time2_minutes
@@ -492,7 +498,7 @@ chkslp: lda time2_seconds
 	sta time1_seconds
 chkmlp:	lda time2_minutes
 	sta time1_minutes
-	jsr todchk1
+	jsr TODCheck
 	lda tod_state
 	bne todfai1			; branch -> TOD failure
 	lda time2_hours
@@ -504,7 +510,7 @@ chkmlp:	lda time2_minutes
 	sta time1_minutes
 chkhlp:	lda time2_hours
 	sta time1_hours
-	jsr todchk1
+	jsr TODCheck
 	lda tod_state
 	bne todfai1			; branch -> TOD failure
 	lda time2_hours
@@ -516,10 +522,14 @@ chkhlp:	lda time2_hours
 chkh12:	cmp #$12
 	bne chkhlp			; check all hours
 	sta time1_hours
-	jsr todchk1
+	jsr TODCheck
 	lda tod_state			; load state
 todfai1:bne todfail			; branch -> TOD failure
 ; TOD alarm test
+
+	jmp todend ; **************************************************************************
+
+
 	lda (cia+ICR),y			; clear cia irq reg
 	lda #$7f
 	sta (cia+ICR),y			; clear all irq mask bits
@@ -564,7 +574,8 @@ todend:	rts
 ; ----------------------------------------------------------------------------
 ; set TOD to time1 and set time2 = time1 + one 10th
 ; count for TOD change and compares to time2
-todchk1:sed				; decimal mode
+TODCheck:
+	sed				; decimal mode
 	sty tod_count1			; clear counter
 	sty tod_count2
 	sty tod_count3
@@ -648,7 +659,7 @@ todok:	cld				; reset decimal flag
 	rts
 ; ----------------------------------------------------------------------------
 ; test, copy code, switch to new bank
-Test:	
+Test:
 	lda #$ff
 	sta test_mask			; test-mask - $ff = test all bits
 	ldy last_rambank
@@ -659,7 +670,8 @@ Test:
 	bpl tstnxbk			; skip if testbank is >= 0
 	ldx last_rambank		; load last RAM bank if code is in bank 0
 tstnxbk:stx copy_target_bank
-	stx $31				; remember target (test) bank $31
+; unused variable
+;	stx $31				; remember target (test) bank $31
 	ldx copy_target_bank
 	stx IndirectBank		; set indirect bank = target bank
 	jsr RAMTest			; sub: RAM Test - bank below code or last bank
@@ -677,7 +689,7 @@ tbnknt0:stx copy_target_bank		; store new target bank
 	dex				; decrease code bank
 	bpl tchknbk			; skip if bank is >= 0
 	ldx last_rambank		; load last RAM bank if code is in bank 0
-tchknbk:lda $15,x			; check if RAM bank is OK = $00
+tchknbk:lda bank_state,x		; check if RAM bank is OK = $00
 	beq tstcpcd			; jump to code copy if new bank is OK
 tscpnok:dex
 	bpl notbk0d			; skip if new code bank is >= 0
@@ -692,7 +704,7 @@ tstcpcd:stx temp5
 	jsr SetCopyTarget		; sub: set copy target = new codebank, start=$0000
 	lda CodeBank
 	jsr SetCopySource		; sub: set copy source = actual codebank, start=$0000
-	ldx #$29			; code size in pages to copy
+	ldx #CODESIZE			; code size in pages to copy
 	inx				; increase one page
 	jsr CopyMemory			; copy code to new bank
 	beq tstcpok			; branch if returns 0=ok
@@ -841,7 +853,7 @@ test3lp:lda (pointer1),y		; check byte from last test again
 	and test_mask
 	beq +
 	jsr TestError			; jump to test error
-+ 		lda #$aa
++ 	lda #$aa
 	sta (pointer1),y
 	lda (pointer1),y
 	eor temp4			; check second byte with $aa
@@ -1082,7 +1094,7 @@ TestError:
 	beq errbnkf			; skip if bank 15
 				; removed dey to show bank 0 fault ********* PATCHED *********
 	lda #$ff
-	sta $0015,y			; store $ff to $15 + defective bank
+	sta bank_state_full,y		; store $ff to bank_state - ?? = defective bank
 	ldy temp_bank			; load defective testbank
 				; removed dey to show bank 0 fault ********* PATCHED *********
 	lda ErrorBarsLow,y		; load screen-pointer to faulty bank from table
@@ -1223,7 +1235,7 @@ CopyMemory:
 	cpy copy_target+1
 	bne +				; skip if target higbyte is $00
 	ldy #$02			; start low byte = $02 if page 0
-+	sty $3f				; save start low byte in $3f
++	sty temp6			; remember start low byte
 -	ldx copy_source_bank
 	stx IndirectBank		; set source bank
 	lda (copy_source),y		; load source byte
@@ -1241,7 +1253,7 @@ CopyMemory:
 	sta counter
 	lda #$00			; clear $47
 	sta error
-	ldy $3f				; load start low byte
+	ldy temp6			; load start low byte
 	lda temp3			; check if temp4 = $00
 	ora temp4
 	and temp4
@@ -1291,7 +1303,7 @@ SetCopyTarget:
 ; Calc screencode digits for byte in A to AY
 Hex2Screencode:	
 	pha				; remember value on stack
-	jsr Nibble2Screencode
+	jsr Nibble2Screencode		; calc low nibble
 	tay				; remember lower digit in Y
 	pla				; restore value
 UpperNibble2Screencode:
@@ -1300,14 +1312,14 @@ UpperNibble2Screencode:
 	lsr
 	lsr
 Nibble2Screencode:
-	and #$0f			; clear upper nibble
-	cmp #$0a			; compare if < 10
-	bmi +				; skip if < 10
+	and #$0f			; isolate low nibble
+	cmp #$0a
+	bmi scdec			; skip if 0-9
 	sec
-	sbc #$09			; sub 9 -> calc screencode A-F 
-	bne ++
-+	ora #$30			; add $30 -> screencode 0-9 of the digit
-++	rts
+	sbc #$09			; calc screencode A-F -> 01-06
+	bne scend			; jump always
+scdec:	ora #$30			; calc screencode 0-9 -> 30-39
+scend:	rts
 ; ----------------------------------------------------------------------------
 ; unused
 	jsr +
@@ -1346,15 +1358,15 @@ SetExteriorColor:
 	rts
 ; ----------------------------------------------------------------------------
 ; copies CIA pointer to ZP
-CopyCIATable:
+InitCIAPointer:
 	lda #cia			; cia pointer in ZP
 	sta pointer1
 	lda #$00
 	sta pointer1+1
-	lda #<CIATable			; XA = CIATable
-	ldx #>CIATable
+	lda #<CIARegs			; XA = CIATable
+	ldx #>CIARegs
 	ldy #$1f			; bytes to copy = $00-$1f
-	jsr CopyTable			; sub: copy table
+	jsr CopyPointer			; sub: copy register pointer
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies Triport2 pointer to ZP
@@ -1362,10 +1374,10 @@ CopyCIATable:
 	sta pointer1
 	lda #$00
 	sta pointer1+1
-	lda #<TPI2Table
-	ldx #>TPI2Table
+	lda #<TPI2Regs
+	ldx #>TPI2Regs
 	ldy #$0f
-	jsr CopyTable
+	jsr CopyPointer
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies Triport1 pointer to ZP
@@ -1373,10 +1385,10 @@ CopyCIATable:
 	sta pointer1
 	lda #$00
 	sta pointer1+1
-	lda #<TPI1Table
-	ldx #>TPI1Table
+	lda #<TPI1Regs
+	ldx #>TPI1Regs
 	ldy #$0f
-	jsr CopyTable
+	jsr CopyPointer
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies ACIA pointer to ZP
@@ -1384,22 +1396,22 @@ CopyCIATable:
 	sta pointer1
 	lda #$00
 	sta pointer1+1
-	lda #<ACIATable
-	ldx #>ACIATable
+	lda #<ACIARegs
+	ldx #>ACIARegs
 	ldy #$07
-	jsr CopyTable
+	jsr CopyPointer
 	rts
 ; ----------------------------------------------------------------------------
 ; copy sid-pointer-table to zeropage for indirect access
-CopySIDTable:
+InitSIDPointer:
 	lda #sid			; sid pointer in ZP
 	sta pointer1
 	lda #$00
 	sta pointer1+1
-	lda #<SIDTable			; XA = SIDTable
-	ldx #>SIDTable
+	lda #<SIDRegs			; XA = SIDTable
+	ldx #>SIDRegs
 	ldy #$39			; bytes to copy = $00-$39
-	jsr CopyTable			; sub: copy table
+	jsr CopyPointer			; sub: copy table
 	rts
 ; ----------------------------------------------------------------------------
 ; unused
@@ -1426,15 +1438,15 @@ CopySIDTable:
 	rts
 ; ----------------------------------------------------------------------------
 ; copy $00-Y bytes in codebank from XA to pointer1
-CopyTable:
+CopyPointer:
 	sta pointer2			; store XA in pointer2
 	stx pointer2+1
 	lda CodeBank			; load actual code bank
 	sta IndirectBank		; set indirect = code bank
-cpytblp:lda (pointer2),y		; copy byte
+-	lda (pointer2),y		; copy byte
 	sta (pointer1),y
 	dey
-	bpl cpytblp			; next byte 
+	bpl -				; next byte 
 	rts
 ; ************************************* ZONE TABLES ***********************************************
 !zone tables
@@ -1460,7 +1472,7 @@ ErrorBarsHigh:
 
 ;284a
 ; unused - VIC pointer
-VICTable:
+VICRegs:
 	!byte $00, $d8, $01, $d8, $02, $d8, $03, $d8
 	!byte $04, $d8, $05, $d8, $06, $d8, $07, $d8
 	!byte $08, $d8, $09, $d8, $0a, $d8, $0b, $d8
@@ -1474,7 +1486,7 @@ VICTable:
 	!byte $28, $d8, $29, $d8, $2a, $d8, $2b, $d8
 	!byte $2c, $d8, $2d, $d8, $2e, $d8
 ; SID pointer copied to $52
-SIDTable:
+SIDRegs:
 	!byte $00, $da, $01, $da, $02, $da, $03, $da
 	!byte $04, $da, $05, $da, $06, $da, $07, $da
 	!byte $08, $da, $09, $da, $0a, $da, $0b, $da
@@ -1483,21 +1495,21 @@ SIDTable:
 	!byte $14, $da, $15, $da, $16, $da, $17, $da
 	!byte $18, $da, $19, $da, $1a, $da, $1b, $da
 	!byte $1c, $da
-; CIA Table copied to $92
-CIATable:
+; CIA Regs copied to $92
+CIARegs:
 	!byte $00, $dc, $01, $dc, $02, $dc, $03, $dc
 	!byte $04, $dc, $05, $dc, $06, $dc, $07, $dc
 	!byte $08, $dc, $09, $dc, $0a, $dc, $0b, $dc
 	!byte $0c, $dc, $0d, $dc, $0e, $dc, $0f, $dc
 ; unused - ACIA pointer copied to $92
-ACIATable:
+ACIARegs:
 	!byte $00, $dd, $01, $dd, $02, $dd, $03, $dd
 ; unused - Triport1 pointer copied to $52
-TPI1Table:
+TPI1Regs:
 	!byte $00, $de, $01, $de, $02, $de, $03, $de
 	!byte $04, $de, $05, $de, $06, $de, $07, $de
 ; unused - Triport2 pointer copied to $62
-TPI2Table:
+TPI2Regs:
 	!byte $00, $df, $01, $df, $02, $df, $03, $df
 	!byte $04, $df, $05, $df, $06, $df, $07, $df
 ; ************************************* ZONE SCREENDATA *******************************************
