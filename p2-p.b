@@ -10,6 +10,7 @@
 ; fix07 - test bank counter
 ; fix08	- cycles counter line1 for 8 digits space
 ; fix09 - removed untested chip-numbers - small fix: adr errorbar bank 3 lobyte wrong
+; first final 1.0
 !cpu 6502
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 ; switches
@@ -1387,13 +1388,13 @@ ScreenData:
 	!byte $74, $6a, $20, $74, $6a, $20, $74, $6a
 	!byte $20, $74, $6a, $20, $74, $6a, $20, $20
 
-	!scr "fixed & "
+	!scr "p500test"
 	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $4c
 	!byte $7a, $20, $4c, $7a, $20, $4c, $7a, $20
 	!byte $4c, $7a, $20, $4c, $7a, $20, $4c, $7a
 	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $20
 
-	!scr "improved"
+	!scr "vers 1.0"
 ;	!byte $20, $38, $33, $20, $38, $34, $20, $30
 ;	!byte $34, $20, $31, $39, $20, $32, $30, $20
 ;	!byte $18, $32, $20, $30, $32, $20, $32, $33
