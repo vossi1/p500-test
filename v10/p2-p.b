@@ -359,8 +359,7 @@ DummySub:
 	rti
 ; ----------------------------------------------------------------------------
 ; play sound
-PlaySound:
-	rts	
+PlaySound:	
 	ldy #$00			; clear Y for indirect writes
 	lda IndirectBank
 	sta temp_bank			; remember target bank
@@ -411,7 +410,7 @@ Test:
 	bpl tstnxbk			; skip if testbank is >= 0
 	ldx last_rambank		; load last RAM bank if code is in bank 0
 tstnxbk:stx copy_target_bank
-;	stx $31				; remember target (test) bank $31
+	stx $31				; remember target (test) bank $31
 	ldx copy_target_bank
 	stx IndirectBank		; set indirect bank = target bank
 	jsr RAMTest			; sub: RAM Test - bank below code or last bank
@@ -593,7 +592,7 @@ test3lp:lda (pointer1),y		; check byte from last test again
 	and test_mask
 	beq +
 	jsr TestError			; jump to test error
-+ 	lda #$aa
++ 		lda #$aa
 	sta (pointer1),y
 	lda (pointer1),y
 	eor temp4			; check second byte with $aa
