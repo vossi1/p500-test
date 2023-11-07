@@ -30,6 +30,32 @@ LIGHTRED		= $0a
 GRAY1			= $0b
 GRAY2			= $0c
 LIGHTGREEN		= $0d
+; TPI register
+PC			= $2 *2		; port c
+MIR			= $5 *2		; interrupt mask register
+CR			= $6 *2		; control register
+; CIA register
+TALO			= $4 *2		; timer a lo
+TAHI			= $5 *2		; timer a hi
+TBLO			= $6 *2		; timer b lo
+TBHI			= $7 *2		; timer b hi
+TOD10			= $8 *2		; tod 10th of seconds
+TODSEC			= $9 *2		; tod seconds
+TODMIN			= $a *2		; tod monutes
+TODHR			= $b *2		; tod hours
+ICR			= $d *2		; interrupt control register
+CRA			= $e *2		; control register b
+CRB			= $f *2		; control register b
+; SID register
+OSC1			= $00 *2	; oscillator 1
+OSC2			= $07 *2	; oscillator 2
+OSC3			= $0e *2	; oscillator 3
+FREQLO			= $00 *2	; frequency lo
+FREQHI			= $01 *2	; frequency hi
+OSCCTL			= $04 *2	; oscillator control
+ATKDCY			= $05 *2	; attack/decay
+SUSREL			= $06 *2	; sustain/release
+VOLUME			= $18 *2	; volume
 ; ***************************************** ADDRESSES *********************************************
 !addr CodeBank		= $00		; code bank register
 !addr IndirectBank	= $01		; indirect bank register
@@ -67,14 +93,14 @@ LIGHTGREEN		= $0d
 !addr temp_bank		= $4b		; temp bank variable
 !addr pointer2		= $4e		; 16bit pointer
 !addr pointer3		= $50		; 16bit pointer
-!addr sid_pointer	= $52		; SID register table
-!addr tpi1_pointer	= $52		; TPI1 register table - unused -
-!addr tpi2_pointer	= $62		; TPI2 register table - unused -
-!addr cia_pointer	= $72		; CIA register table - unused -
-!addr acia_pointer	= $92		; ACIA register table - unused -
+!addr sid		= $52		; SID register table -$91
+!addr tpi1		= $52		; TPI1 register table - unused -
+!addr tpi2		= $62		; TPI2 register table - unused -
+!addr cia		= $92		; CIA register table -$b1
+!addr acia		= $92		; ACIA register table - unused -
 ; ****************************************** MACROS ***********************************************
-!macro WriteSID .r{			; *** set VDP Register
-	sta(sid_pointer + 2*.r),y	; writes data in A to SID via pointer table
+!macro WriteSID .r{			; *** set SID Register
+	sta(sid + 2*.r),y	; writes data in A to SID via pointer table
 }
 ; ***************************************** ZONE MAIN *********************************************
 !zone main
@@ -287,11 +313,15 @@ FillColor:
 	rts
 ; ----------------------------------------------------------------------------
 ; Main loop
-Main:	jsr CopySIDTable		; init zeropage $52-$8c from SIDTable
+Main:	
+	jsr CopySIDTable		; init sid pointer
 	lda #SYSTEMBANK
 	sta IndirectBank		; switch to bank 15
 	jsr PlaySound			; play sound
 	jsr SetExteriorColor		; increase exterior color after each cycle
+	jsr TODTest			; tod test				********** EXTENDED **********
+	jsr CopySIDTable		; init sid pointer
+	jsr PlaySound			; play sound	
 	jsr DummySub			; Call 19x dummy-subroutine
 	jsr DummySub
 	jsr DummySub
@@ -366,41 +396,252 @@ PlaySound:
 	sta temp_bank			; remember target bank
 	lda #SYSTEMBANK
 	sta IndirectBank		; indirect bank = bank 15
-	+WriteSID $18			; volume = 15 (A already 15)
+	sta (sid+VOLUME),y		; volume = 15 (A already 15)
 	lda #$1a
-	+WriteSID $0c			; voice 2 AD
+	sta (sid+OSC2+ATKDCY),y		; voice 2 AD
 	lda #$0a
-	+WriteSID $0d			; voice 2 SR
+	sta (sid+OSC2+SUSREL),y		; voice 2 SR
 	lda #$4e			; frequency = 200000 ~ note D#6
-	+WriteSID $08			; voice 2 frequency hi
+	sta (sid+OSC2+FREQHI),y		; voice 2 frequency hi
 	lda #$20
-	+WriteSID $07			; voice 2 frequency low
+	sta (sid+OSC2+FREQLO),y		; voice 2 frequency low
 	lda #$18
-	+WriteSID $13			; voice 3 AD	with 3 voices ********* PATCHED *********
+	sta (sid+OSC3+ATKDCY),y		; voice 3 AD	with 3 voices ********* PATCHED *********
 	lda #$0a
-	+WriteSID $14			; voice 3 SR
+	sta (sid+OSC3+SUSREL),y		; voice 3 SR
 	lda #$09			; frequency = 2500
-	+WriteSID $0f			; voice 3 frequency hi
+	sta (sid+OSC3+FREQHI),y		; voice 3 frequency hi
 	lda #$c4
-	+WriteSID $0e			; voice 3 frequency low
+	sta (sid+OSC3+FREQLO),y		; voice 3 frequency low
 	lda #$07			; frequency = 2000 ~ note B2
-	+WriteSID $01			; voice 1 frequency hi
+	sta (sid+OSC1+FREQHI),y		; voice 1 frequency hi
 	lda #$d0
-	+WriteSID $00			; voice 1 frequency low
+	sta (sid+OSC1+FREQLO),y		; voice 1 frequency low
 	lda #$15
-	+WriteSID $0b			; voice 2 triangle,ringmod,gate
+	sta (sid+OSC2+OSCCTL),y		; voice 2 triangle,ringmod,gate
 	lda #$21
-	+WriteSID $12			; voice 3 triangle, gate
+	sta (sid+OSC3+OSCCTL),y		; voice 3 triangle, gate
 	lda #$14
-	+WriteSID $0b			; voice 2 triangle, ringmod
+	sta (sid+OSC2+OSCCTL),y		; voice 2 triangle, ringmod
 	lda #$20
-	+WriteSID $12			; voice 3 triangle
+	sta (sid+OSC3+OSCCTL),y		; voice 3 triangle
 	lda temp_bank
 	sta IndirectBank		; restore target bank
 	rts
 ; ----------------------------------------------------------------------------
+; enable all CIA interrupts
+eciairq:ldy #$00
+	lda #$7f			; clear all irq mask bits
+	sta (cia+ICR),y
+; clear CIA inerrupt reg
+cciairq:ldy #$00
+	lda (cia+ICR),y			; clear irq reg
+	rts
+	rti				; unused
+; ----------------------------------------------------------------------------
+; TOD tests
+TODTest:
+	sei				; disable interrupts (ALARM test checks reg)
+;	ldx #$35			; "6526 TOD TESTS"
+;	jsr drawtxt			; sub: draw screen text
+	jsr CopyCIATable		; init cia pointer
+	jsr eciairq			; enable cia irq's
+	ldy #$00
+	sty tod_state			; init TOD state to 0 = ok
+	lda #SYSTEMBANK
+	sta IndirectBank		; systembank for cia
+	sty time2_minutes		; init h,m,s vars to 0
+	sty time2_seconds
+	sty time2_10th
+	sty time1_minutes
+	sty time1_seconds
+	sty time1_10th
+	lda #$01
+	sta time2_hours			; init hours vars to 1
+	sta time1_hours
+; test 10x 10th change in first second
+chk10lp:lda time2_10th
+	sta time1_10th			; copy 10th to time2
+	jsr todchk1			; check if TOD increases one 10th
+	lda tod_state
+	bne todfai1			; branch -> TOD failure
+	lda time2_seconds
+	beq chk10lp			; check all 10th
+	jsr playsnd			; play sound after 1 second
+; test last 10th increases a second
+	lda #$09
+	sta time1_10th
+chkslp: lda time2_seconds
+	sta time1_seconds
+	jsr todchk1
+	lda tod_state
+	bne todfai1
+	lda time2_minutes
+	beq chkslp			; check all seconds
+	jsr playsnd
+; test minutes change
+	lda #$59
+	sta time1_seconds
+chkmlp:	lda time2_minutes
+	sta time1_minutes
+	jsr todchk1
+	lda tod_state
+	bne todfai1			; branch -> TOD failure
+	lda time2_hours
+	cmp #$01
+	beq chkmlp			; check all minutes
+	jsr playsnd
+; test hours change
+	lda #$59
+	sta time1_minutes
+chkhlp:	lda time2_hours
+	sta time1_hours
+	jsr todchk1
+	lda tod_state
+	bne todfai1			; branch -> TOD failure
+	lda time2_hours
+	cmp #$01
+	bne chkh12			; skip if not 1
+	lda #$81
+	sta time2_hours			; set pm
+	bne chkhlp			; check all hours
+chkh12:	cmp #$12
+	bne chkhlp			; check all hours
+	sta time1_hours
+	jsr todchk1
+	lda tod_state			; load state
+todfai1:bne todfail			; branch -> TOD failure
+; TOD alarm test
+	lda (cia+ICR),y			; clear cia irq reg
+	lda #$7f
+	sta (cia+ICR),y			; clear all irq mask bits
+	lda #$80
+	sta (cia+CRB),y			; set bit #7 - TOD ALARM
+	lda time2_hours
+	sta (cia+TODHR),y		; set ALARM
+	lda time2_minutes
+	sta (cia+TODMIN),y
+	lda time2_seconds
+	sta (cia+TODSEC),y
+	lda time2_10th
+	clc
+	adc #$01
+	sta (cia+TOD10),y		; set ALARM to time2 + one 10th
+	sty tod_count1			; clear counter
+	sty tod_count2
+alarmlp:lda (cia+ICR),y
+	bne chkalar			; irq -> test for ALARM irq bit #2
+	dec tod_count1
+	bne alarmlp			; wait for ALARM
+	dec tod_count2
+	bne alarmlp			; wait for ALARM
+	beq todfail			; branch -> TOD failure
+chkalar:cmp #$04			; test ALARM irq bit
+	beq todend			; skip if tod ALARM OK	
+; tod fails
+todfail:lda #$ff
+	sta cia_tod_fail		; remember tod failed
+	lda #$bf
+	sta pointer3
+	lda #$d5
+	sta pointer3+1
+	jsr drawbad			; draw chip BAD
+	lda cia_tmr_fail
+	bne todend			; skip if timer already failed 
+	ldx #$33			; "TOD"
+	bne drawtod			; jump always -> draw text
+; unused - never reachable
+	ldx #$34			; "TNT"
+drawtod:jsr drawtxt			; sub: draw screen text
+todend:	rts
+; ----------------------------------------------------------------------------
+; set TOD to time1 and set time2 = time1 + one 10th
+; count for TOD change and compares to time2
+todchk1:sed				; decimal mode
+	sty tod_count1			; clear counter
+	sty tod_count2
+	sty tod_count3
+	lda time1_hours
+	sta time2_hours
+	sta (cia+TODHR),y		; set TOD starting with hours (halts TOD) to time1
+	lda time1_minutes
+	sta time2_minutes
+	sta (cia+TODMIN),y
+	lda time1_seconds
+	sta time2_seconds
+	sta (cia+TODSEC),y
+	lda time1_10th
+	sta (cia+TOD10),y		; set TOD 10th (starts TOD)
+	clc
+	adc #$01
+	sta time2_10th			; set time2 = time1 + one 10th
+	cmp #$10
+	bne chktod			; skip if < 10
+	sty time2_10th			; reset time2 10th
+	clc
+	lda time2_seconds
+	adc #$01
+	sta time2_seconds		; inc time2 seconds
+	cmp #$60
+	bne chktod			; skip if < 60
+	sty time2_seconds		; reset time2 seconds
+	clc
+	lda time2_minutes
+	adc #$01
+	sta time2_minutes		; inc time2 minutes
+	cmp #$60
+	bne chktod			; skip if < 60
+	sty time2_minutes		; reset time minutes
+	clc
+	lda time2_hours
+	adc #$01
+	sta time2_hours
+	and #$1f			; isolate hours (without pm flag)
+	cmp #$13
+	bne chk12			; branch if time2 hours <>13
+; set hours at 13 to 1 and toggles AM/PM
+	lda time2_hours			; load time2 hours with pm flag
+	and #$81			; at 13 reset hours to 1, preserve pm flag
+	sta time2_hours
+	bne togglpm			; jump always -> toggle am/pm
+chk12:	cmp #$12
+	beq togglpm			; if hours = 12 -> toggle pm flag
+; toggles AM/PM back at 1
+	cmp #$01
+	bne chktod			; branch if hours > 1 and < 12
+togglpm:lda #$80
+	eor time2_hours			; toogle pm flag
+	sta time2_hours
+; count time for change of TOD to time1 init value
+chktod:	lda (cia+TOD10),y
+	cmp time1_10th
+	bne todchg
+	dec tod_count1			; dec counter if no change
+	bne chktod
+	dec tod_count2
+	bne chktod
+	dec tod_count3
+	bne chktod
+	beq todbad			; if TOD doesn't change in 999999 cycles -> bad
+; compare new time to time2
+todchg:	cmp time2_10th			; compare if TOD is now = time2
+	bne todbad			; if not -> failure
+	lda (cia+TODSEC),y
+	cmp time2_seconds
+	bne todbad			; ********** CMOS ERROR: TOD seconds still 1, but time2_seconds=2 **********
+	lda (cia+TODMIN),y
+	cmp time2_minutes
+	bne todbad
+	lda (cia+TODHR),y
+	cmp time2_hours
+	beq todok
+todbad:	lda #$ff			; state = TOD bad
+	sta tod_state
+todok:	cld				; reset decimal flag
+	rts
+; ----------------------------------------------------------------------------
 ; test, copy code, switch to new bank
-Test:
+Test:	
 	lda #$ff
 	sta test_mask			; test-mask - $ff = test all bits
 	ldy last_rambank
@@ -1097,19 +1338,20 @@ SetExteriorColor:
 	bne -
 	rts
 ; ----------------------------------------------------------------------------
-; unused - copies CIA pointer to ZP
-	lda #cia_pointer
+; copies CIA pointer to ZP
+CopyCIATable:
+	lda #cia			; cia pointer in ZP
 	sta pointer1
 	lda #$00
 	sta pointer1+1
-	lda #<CIATable
+	lda #<CIATable			; XA = CIATable
 	ldx #>CIATable
-	ldy #$1f
-	jsr CopyTable
+	ldy #$1f			; bytes to copy = $00-$1f
+	jsr CopyTable			; sub: copy table
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies Triport2 pointer to ZP
-	lda #tpi2_pointer
+	lda #tpi2	
 	sta pointer1
 	lda #$00
 	sta pointer1+1
@@ -1120,7 +1362,7 @@ SetExteriorColor:
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies Triport1 pointer to ZP
-	lda #tpi1_pointer
+	lda #tpi1	
 	sta pointer1
 	lda #$00
 	sta pointer1+1
@@ -1131,7 +1373,7 @@ SetExteriorColor:
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies ACIA pointer to ZP
-	lda #acia_pointer
+	lda #acia	
 	sta pointer1
 	lda #$00
 	sta pointer1+1
@@ -1143,7 +1385,7 @@ SetExteriorColor:
 ; ----------------------------------------------------------------------------
 ; copy sid-pointer-table to zeropage for indirect access
 CopySIDTable:
-	lda #sid_pointer		; sid pointer in ZP
+	lda #sid			; sid pointer in ZP
 	sta pointer1
 	lda #$00
 	sta pointer1+1
@@ -1234,7 +1476,7 @@ SIDTable:
 	!byte $14, $da, $15, $da, $16, $da, $17, $da
 	!byte $18, $da, $19, $da, $1a, $da, $1b, $da
 	!byte $1c, $da
-; unused - CIA Table copied to $72
+; CIA Table copied to $92
 CIATable:
 	!byte $00, $dc, $01, $dc, $02, $dc, $03, $dc
 	!byte $04, $dc, $05, $dc, $06, $dc, $07, $dc
@@ -1400,7 +1642,7 @@ ScreenData:
 ;	!byte $18, $32, $20, $30, $32, $20, $32, $33
 	!byte $20, $20, $20, $20, $20, $20, $20, $20
 	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
+	!byte $20, $20, $20, $30, $32, $20, $20, $20	; U02 = CIA
 	!byte $20, $32, $34, $20, $38, $35, $20, $20
 
 	!scr "vossi'20"
