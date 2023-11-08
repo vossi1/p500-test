@@ -68,10 +68,9 @@ VOLUME			= $18 *2	; volume
 !addr VIC		= $d800		; VIC register
 ; ***************************************** ZERO PAGE *********************************************
 !addr pointer1		= $10		; 16bit pointer
-!addr bank_state	= $15 ; - $??	; bank faulty state
+!addr bank_state	= $15 ; - $18	; bank faulty state (max 4 banks)
 !addr bank_state_full	= $0015
 !addr ext_color		= $1b		; exterior color
-!addr delaycounter	= $1c		; 8bit counter for delay loop
 !addr cycles		= $21 ; - $24	; cycles counter decimal for 8 digits
 !addr test_pages	= $25		; pages to test
 !addr temp2		= $26		; temp variable
@@ -100,25 +99,25 @@ VOLUME			= $18 *2	; volume
 !addr pointer2		= $4e		; 16bit pointer
 !addr pointer3		= $50		; 16bit pointer
 !addr sid		= $52 ; -$91	; SID register table
-!addr tpi1		= $52		; TPI1 register table - unused -
-!addr tpi2		= $62		; TPI2 register table - unused -
+!addr tpi1		= $92 ; -$a1	; TPI1 register table - unused -
+!addr tpi2		= $92 ; -$a1	; TPI2 register table - unused -
 !addr cia		= $92 ; -$b1	; CIA register table
-!addr acia		= $92		; ACIA register table - unused -
+!addr acia		= $92 ; -$99	; ACIA register table - unused -
 
-!addr time1_hours	= $f0		; time 1 hours
-!addr time1_minutes	= $f1		; time 1 minutes
-!addr time1_seconds	= $f2		; time 1 seconds
-!addr time1_10th	= $f3		; time 1 10th seconds
-!addr time2_hours	= $f4		; time 2 hours
-!addr time2_minutes	= $f5		; time 2 minutes
-!addr time2_seconds	= $f6		; time 2 seconds
-!addr time2_10th	= $f7		; time 2 10th seconds
-!addr tod_count1	= $f8		; tod test counter
-!addr tod_count2	= $f9		; tod test counter
-!addr tod_count3	= $fa		; tod test counter
-!addr tod_state		= $fb		; TOD state - $ff = bad
-!addr cia_tod_fail	= $fc		; 0 = TOD ok, $ff = tod failed
-!addr cia_tmr_fail	= $fd		; 0 = timer ok, $ff = timer failed
+!addr time1_hours	= $b2		; time 1 hours
+!addr time1_minutes	= $b3		; time 1 minutes
+!addr time1_seconds	= $b4		; time 1 seconds
+!addr time1_10th	= $b5		; time 1 10th seconds
+!addr time2_hours	= $b6		; time 2 hours
+!addr time2_minutes	= $b7		; time 2 minutes
+!addr time2_seconds	= $b8		; time 2 seconds
+!addr time2_10th	= $b9		; time 2 10th seconds
+!addr tod_count1	= $ba		; tod test counter
+!addr tod_count2	= $bb		; tod test counter
+!addr tod_count3	= $bc		; tod test counter
+!addr tod_state		= $bd		; TOD state - $ff = bad
+!addr cia_tod_fail	= $be		; 0 = TOD ok, $ff = tod failed
+!addr cia_tmr_fail	= $bf		; 0 = timer ok, $ff = timer failed
 ; ***************************************** ZONE MAIN *********************************************
 !zone main
 !initmem FILL
@@ -139,20 +138,20 @@ clrzplp:sta $0000,y
 	bne clrzplp
 ; draw screen
 	jsr ClearScreen			; clear screen and select graphics character set
-	lda #$30			; source = $3000
+	lda #>ScreenData		; source = ScreenData
 	sta copy_source+1
-	lda #$00
+	lda #<ScreenData
 	sta copy_source
-	lda #>ScreenRAM			; target = $d000
+	lda #>ScreenRAM			; target = ScreenRAM
 	sta copy_target+1
 	lda #<ScreenRAM
 	sta copy_target
 	lda CodeBank			; source = active code bank
 	sta copy_source_bank
-	lda #SYSTEMBANK			; target bank 15
+	lda #SYSTEMBANK			; target = Bank 15
 	sta copy_target_bank
 	ldx #$04			; 4 pages to copy
-	jsr CopyMemory
+	jsr CopyMemory			; sub: draw screen
 ; color screen
 	ldx #SYSTEMBANK			; set indirect bank to 15
 	stx IndirectBank
@@ -1098,9 +1097,9 @@ TestError:
 	sta bank_state_full,y		; store $ff to bank_state - ?? = defective bank
 	ldy temp_bank			; load defective testbank
 				; removed dey to show bank 0 fault ********* PATCHED *********
-	lda ErrorBarsLow,y		; load screen-pointer to faulty bank from table
+	lda BankScreenPosLo,y		; load screen-pointer to faulty bank from table
 	sta pointer2
-	lda ErrorBarsHigh,y
+	lda BankScreenPosHi,y
 	sta pointer2+1
 	ldx #$08			; 8 bits to check
 	stx temp5
@@ -1322,19 +1321,6 @@ Nibble2Screencode:
 scdec:	ora #$30			; calc screencode 0-9 -> 30-39
 scend:	rts
 ; ----------------------------------------------------------------------------
-; unused
-	jsr +
-	asl
-	asl
-	rts
-
-+	clc
-	sta temp1
-	asl
-	asl
-	adc temp1
-	rts
-; ----------------------------------------------------------------------------
 ; Set exterior color
 SetExteriorColor:
 	inc ext_color			; increase exterior color
@@ -1345,17 +1331,6 @@ SetExteriorColor:
 	lda ext_color
 	ldy #$00
 	sta (color_pointer),y
-	rts
-; ----------------------------------------------------------------------------
-; unused - delay $1000000 loops
-	ldy #$ff
-	ldx #$ff
--	dey
-	bne -
-	dex
-	bne -
-	dec delaycounter
-	bne -
 	rts
 ; ----------------------------------------------------------------------------
 ; copies CIA pointer to ZP
@@ -1415,29 +1390,6 @@ InitSIDPointer:
 	jsr CopyPointer			; sub: copy table
 	rts
 ; ----------------------------------------------------------------------------
-; unused
-	lda #$f0
-	sta $fffa
-	lda #$00
-	sta $fffb
-	lda #$f2
-	sta $fffc
-	lda #$00
-	sta $fffd
-	lda #$f4
-	sta $fffe
-	lda #$00
-	sta $ffff
-	lda #$f0
-	sta $f0
-	sta $f2
-	sta $f4
-	lda #$21
-	sta $f1
-	sta $f3
-	sta $f5
-	rts
-; ----------------------------------------------------------------------------
 ; copy $00-Y bytes in codebank from XA to pointer1
 CopyPointer:
 	sta pointer2			; store XA in pointer2
@@ -1452,20 +1404,15 @@ CopyPointer:
 ; ************************************* ZONE TABLES ***********************************************
 !zone tables
 Messages:
-	!scr "LO ADR BYTE TEST "
-	!scr "HI ADR BYTE TEST "
-	!scr "CHKRBRD $55, $AA AA, $55 "
-	!scr "MARCH INC ADR $5A "
-	!scr "DEC ADR $A5 5A "
-	!scr "INC ADR $FF "
-	!scr "DEC ADR $00 "
-	!scr "STATIC RAM TESTS  "
-	!scr "6526 TIMERS TESTS "
+	!scr "checksums  "
+	!scr "timertests "
+	!scr "tod-tests  "
+	!scr "testbank   "
 
-ErrorBarsLow:
+BankScreenPosLo:
 	!byte $89, $a9, $49, $e9 ; ************ patched last byte to first
 
-ErrorBarsHigh:
+BankScreenPosHi:
 	!byte $d2, $d0, $d1, $d1 ; *********** patched last byte to first
 
 ;282a
@@ -1517,161 +1464,40 @@ TPI2Regs:
 !zone screendata
 *= $3000
 ScreenData:
-	!scr "rambanks"					; ********* PATCHED *********
-	!byte $20, $20, $20, $65, $10, $05, $14, $20
-	!byte $09, $09, $20, $04, $09, $01, $07, $0e
-	!byte $0f, $13, $14, $09, $03, $67, $20, $20
-	!scr "cycles  "					; ********* PATCHED *********
+	!scr "rambanks   ",$65,"pet ii diagnostic",$67,"  cycles  "
+	!scr "           ",$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,$63,"          "
+	!scr "                                        "
+	!scr "         d7 d6 d5 d4 d3 d2 d1 d0        "
 
-	!scr "testbank"
-	!byte $20, $20, $20, $63, $63, $63, $63, $63
-	!byte $63, $63, $63, $63, $63, $63, $63, $63
-	!byte $63, $63, $63, $63, $63, $63, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
+	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
+	!scr "  bank 1 ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
+	!scr "         ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
+	!scr "         33 34 35 36 37 38 39 40        "
 
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
+	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
+	!scr "  bank 2 ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
+	!scr "         ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
+	!scr "         41 42 43 44 45 46 47 48        "
 
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!scr " d7 d6 d"
-	!scr "5 d4 d3 "
-	!scr "d2 d1 d0"
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
+	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
+	!scr "  bank 3 ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
+	!scr "         ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
+	!scr "         58 59 60 61 62 63 64 65        "
+;	!scr "         58 59 60 61 62 63 64 65 76 82  "
 
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $4f
-	!byte $50, $20, $4f, $50, $20, $4f, $50, $20
-	!byte $4f, $50, $20, $4f, $50, $20, $4f, $50
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $20
+	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
+	!scr "  bank 0 ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
+	!scr "         ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
+	!scr "         73 72 71 70 69 68 67 66 74 75  "
 
-	!scr "  bank 1"
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $74
-	!byte $6a, $20, $74, $6a, $20, $74, $6a, $20
-	!byte $74, $6a, $20, $74, $6a, $20, $74, $6a
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $20
+	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
+	!scr "         ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
+	!scr "p500test ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
+	!scr "vers 1.1                   02    24 85  "
+;	!scr "vers 1.1 83 84 04 19 20 82 02    24 85  "				; original
+	!scr "vossi'23                                "
 
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $4c
-	!byte $7a, $20, $4c, $7a, $20, $4c, $7a, $20
-	!byte $4c, $7a, $20, $4c, $7a, $20, $4c, $7a
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $33, $33, $20, $33, $34, $20, $33
-	!byte $35, $20, $33, $36, $20, $33, $37, $20
-	!byte $33, $38, $20, $33, $39, $20, $34, $30
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $4f
-	!byte $50, $20, $4f, $50, $20, $4f, $50, $20
-	!byte $4f, $50, $20, $4f, $50, $20, $4f, $50
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $20
-
-	!scr "  bank 2"
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $74
-	!byte $6a, $20, $74, $6a, $20, $74, $6a, $20
-	!byte $74, $6a, $20, $74, $6a, $20, $74, $6a
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $4c
-	!byte $7a, $20, $4c, $7a, $20, $4c, $7a, $20
-	!byte $4c, $7a, $20, $4c, $7a, $20, $4c, $7a
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $34, $31, $20, $34, $32, $20, $34
-	!byte $33, $20, $34, $34, $20, $34, $35, $20
-	!byte $34, $36, $20, $34, $37, $20, $34, $38
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $4f
-	!byte $50, $20, $4f, $50, $20, $4f, $50, $20
-	!byte $4f, $50, $20, $4f, $50, $20, $4f, $50
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $20
-
-	!scr "  bank 3"
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $74
-	!byte $6a, $20, $74, $6a, $20, $74, $6a, $20
-	!byte $74, $6a, $20, $74, $6a, $20, $74, $6a
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $4c
-	!byte $7a, $20, $4c, $7a, $20, $4c, $7a, $20
-	!byte $4c, $7a, $20, $4c, $7a, $20, $4c, $7a
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $35, $38, $20, $35, $39, $20, $36
-	!byte $30, $20, $36, $31, $20, $36, $32, $20
-	!byte $36, $33, $20, $36, $34, $20, $36, $35
-;	!byte $20, $37, $36, $20, $38, $32, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $4f
-	!byte $50, $20, $4f, $50, $20, $4f, $50, $20
-	!byte $4f, $50, $20, $4f, $50, $20, $4f, $50
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $20
-
-	!scr "  bank 0"
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $74
-	!byte $6a, $20, $74, $6a, $20, $74, $6a, $20
-	!byte $74, $6a, $20, $74, $6a, $20, $74, $6a
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $4c
-	!byte $7a, $20, $4c, $7a, $20, $4c, $7a, $20
-	!byte $4c, $7a, $20, $4c, $7a, $20, $4c, $7a
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $37, $33, $20, $37, $32, $20, $37
-	!byte $31, $20, $37, $30, $20, $36, $39, $20
-	!byte $36, $38, $20, $36, $37, $20, $36, $36
-	!byte $20, $37, $34, $20, $37, $35, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $4f
-	!byte $50, $20, $4f, $50, $20, $4f, $50, $20
-	!byte $4f, $50, $20, $4f, $50, $20, $4f, $50
-	!byte $20, $4f, $50, $20, $4f, $50, $20, $20
-
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $74
-	!byte $6a, $20, $74, $6a, $20, $74, $6a, $20
-	!byte $74, $6a, $20, $74, $6a, $20, $74, $6a
-	!byte $20, $74, $6a, $20, $74, $6a, $20, $20
-
-	!scr "p500test"
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $4c
-	!byte $7a, $20, $4c, $7a, $20, $4c, $7a, $20
-	!byte $4c, $7a, $20, $4c, $7a, $20, $4c, $7a
-	!byte $20, $4c, $7a, $20, $4c, $7a, $20, $20
-
-	!scr "vers 1.1"
-;	!byte $20, $38, $33, $20, $38, $34, $20, $30
-;	!byte $34, $20, $31, $39, $20, $32, $30, $20
-;	!byte $18, $32, $20, $30, $32, $20, $32, $33
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $30, $32, $20, $20, $20	; U02 = CIA
-	!byte $20, $32, $34, $20, $38, $35, $20, $20
-
-	!scr "vossi'23"
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-	!byte $20, $20, $20, $20, $20, $20, $20, $20
-
-	!byte $00, $20, $20, $20, $20, $20, $20, $20
+	!byte $00, $20, $20, $20, $20, $20, $20, $20				; last 24 bytes behind screenRAM
 	!byte $20, $20, $20, $20, $20, $20, $20, $20
 	!byte $20, $20, $20, $20, $20, $20, $20, $20
 
