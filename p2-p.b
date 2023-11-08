@@ -89,6 +89,8 @@ VOLUME			= $18 *2	; volume
 !addr counter		= $35		; counter
 !addr color_pointer	= $36		; 16bit colorpointer
 !addr test_mask		= $3a		; test mask (to test only 4 bit in color RAM)	
+!addr screen_pos	= $3b		; screen pos rom checksums
+!addr temp_count_sum	= $3c		; temp rom checksums
 !addr temp6		= $3f		; temp6	
 !addr start_high	= $41		; test start address highbyte	
 !addr start_low		= $42		; test start address lowbyte	
@@ -97,9 +99,12 @@ VOLUME			= $18 *2	; volume
 !addr temp4		= $45		; temp variable
 !addr check		= $46		; check variable
 !addr error		= $47		; error state
+!addr temp7		= $48		; temp timer test
 !addr temp5		= $49		; temp variable
 !addr banks_counter	= $4a		; counter for banks to test in a cycle
 !addr temp_bank		= $4b		; temp bank variable
+!addr temp_dec_value	= $4c		; temp timertest
+!addr temp_irq		= $4d		; temp irq
 !addr pointer2		= $4e		; 16bit pointer
 !addr pointer3		= $50		; 16bit pointer
 !addr sid		= $52 ; -$91	; SID register table
@@ -119,7 +124,8 @@ VOLUME			= $18 *2	; volume
 !addr tod_count1	= $ba		; tod test counter
 !addr tod_count2	= $bb		; tod test counter
 !addr tod_count3	= $bc		; tod test counter
-!addr tod_state		= $bd		; TOD state - $ff = bad
+!addr tod_state		= $bd		; TOD state - $00 ok, $ff = bad
+!addr timer_state	= $bd		; timer state - $00 = ok
 !addr cia_tod_fail	= $be		; 0 = TOD ok, $ff = tod failed
 !addr cia_tmr_fail	= $bf		; 0 = timer ok, $ff = timer failed
 ; ***************************************** ZONE MAIN *********************************************
@@ -345,6 +351,8 @@ Main:
 	sta IndirectBank		; switch to bank 15
 	jsr PlaySound			; play sound
 	jsr SetExteriorColor		; increase exterior color after each cycle
+	jsr ROMChecksums		; calc and print ROM checksums
+;	jsr TimerTest			; timer test
 	jsr TODTest			; tod test				********** EXTENDED **********
 	jsr DummySub			; Call 19x dummy-subroutine
 	jsr DummySub
@@ -450,6 +458,346 @@ PlaySound:
 	sta (sid+OSC3+OSCCTL),y		; voice 3 triangle
 	lda temp_bank
 	sta IndirectBank		; restore target bank
+	rts
+; ----------------------------------------------------------------------------
+; calc and print rom checksums
+ROMChecksums:
+	ldx #0				; "CHECKSUMS"
+	jsr DrawMessage			; sub: draw message
+	lda #SYSTEMBANK
+	sta IndirectBank		; systembank
+	ldy #$00			; first screen position
+	ldx #$20			; rom size 2000
+	lda #$e0			; kernal address e000
+	jsr prntrom			; calculate and print checksum of one rom
+	ldy #$03			; screen pos basic hi
+	ldx #$20
+	lda #$a0			; basic hi address a000
+	jsr prntrom			; calculate and print checksum of one rom
+	ldy #$06
+	ldx #$20
+	lda #$80			; basic hi address 8000
+; calculate and print checksum of rom
+prntrom:sty screen_pos
+	sta pointer1+1			; set pointer hi to rom start
+	dex
+	txa
+	clc
+	adc pointer1+1			; calc rom end 
+	sta pointer1+1
+	lda #$00
+	sta temp_count_sum		; init sum
+	sta pointer1
+	tay
+rsumlp:	clc
+	lda (pointer1),y		; load byte
+	adc temp_count_sum		; add previous value
+	adc #$00			; add carry
+	adc #$00			; ***** why ?
+	sta temp_count_sum		; store new sum
+	dey
+	bne rsumlp			; next byte
+	dec pointer1+1
+	dex
+	bpl rsumlp			; next page
+; print sum
+	lda #<(ScreenRAM+40*21+9)	; screen position lo
+	clc
+	adc screen_pos			; screen pos add value
+	sta pointer3
+	lda #>(ScreenRAM+40*21+9)	; screen pos hi
+	adc #$00			; add carry of screen pos lo
+	sta pointer3+1
+	lda temp_count_sum
+	jsr Hex2Screencode		; calc screen code for a byte
+	sty temp2
+	ldy #$00
+	sta (pointer3),y		; print to screen
+	iny
+	lda temp2
+	sta (pointer3),y
+	rts
+; ----------------------------------------------------------------------------
+; timer tests
+TimerTest:
+	sei
+	ldx #1				; "TIMERTESTS"
+	jsr DrawMessage			; sub: draw message
+	jsr l2cb9
+	jsr InitCIAPointer		; sub: init cia pointer
+	lda #SYSTEMBANK
+	sta IndirectBank
+	jsr eciairq
+	ldy #$00
+	lda #$00
+	sta (cia+CRB),y
+	lda #$08
+	sta (cia+CRA),y
+	sty timer_state
+	ldx #$01
+	jsr l2527
+	beq l239a
+	dec timer_state
+l239a:	jsr l2549
+	bne l23a1
+	dec timer_state
+l23a1:	ldx #$01
+	lda #$00
+	sta (cia+CRA),y
+	jsr l2527
+	beq l23ae
+	dec timer_state
+l23ae:	ldx #$01
+	jsr l2549
+	beq l23b7
+	dec timer_state
+l23b7:	lda (cia+CRA),y
+	and #$fe
+	sta (cia+CRA),y
+	lda #$08
+	sta (cia+CRB),y
+	ldx #$02
+	jsr l2538
+	beq l23ca
+	dec timer_state
+l23ca:	lda (cia+CRB),y
+	and #$fe
+	sta (cia+CRB),y
+	lda #$40
+	sta temp_dec_value
+l23d4:	lda #$00
+	sta (cia+CRA),y
+	sta (cia+CRB),y
+	lda #$55
+	sta (cia+TALO),y
+	sta (cia+TAHI),y
+	lda (cia+TALO),y
+	cmp #$55
+	beq l23e8
+	dec timer_state
+l23e8:	lda (cia+TAHI),y
+	cmp #$55
+	beq l23f0
+	dec timer_state
+l23f0:	lda #$aa
+	sta (cia+TAHI),y
+	sta (cia+TALO),y
+	lda (cia+TALO),y
+	cmp #$55
+	beq l23fe
+	dec timer_state
+l23fe:	lda (cia+TAHI),y
+	cmp #$aa
+	beq l2408
+	lda #$ff
+	sta timer_state
+l2408:	lda #$10
+	sta (cia+CRA),y
+	lda (cia+TALO),y
+	cmp #$aa
+	beq l2414
+	dec timer_state
+l2414:	lda (cia+TAHI),y
+	cmp #$aa
+	beq l241c
+	dec timer_state
+l241c:	lda #$55
+	sta (cia+TBLO),y
+l2420:	sta (cia+TBHI),y
+	lda (cia+TBLO),y
+	cmp #$55
+	beq l242a
+	dec timer_state
+l242a:	lda (cia+TBHI),y
+	cmp #$55
+	beq l2432
+	dec timer_state
+l2432:	lda #$aa
+	sta (cia+TBHI),y
+	sta (cia+TBLO),y
+	lda (cia+TBLO),y
+	cmp #$55
+	beq l2440
+	dec timer_state
+l2440:	lda (cia+TBHI),y
+	cmp #$aa
+	beq l2448
+	dec timer_state
+l2448:	lda #$10
+	sta (cia+CRB),y
+	lda (cia+TBLO),y
+	cmp #$aa
+	beq l2454
+	dec timer_state
+l2454:	lda (cia+TBHI),y
+	cmp #$aa
+	beq l245c
+	dec timer_state
+l245c:	lda #$09
+	sta (cia+CRA),y
+	lda #$cc
+	sta (cia+TALO),y
+	sta (cia+TAHI),y
+	lda (cia+TALO),y
+	cmp #$aa
+	bmi l246e
+	dec timer_state
+l246e:	lda (cia+TAHI),y
+	cmp #$aa
+	beq l2476
+	dec timer_state
+l2476:	lda #$19
+	ldx #$00
+	sta (cia+CRA),y
+	txa
+	sta (cia+CRA),y
+	lda (cia+TALO),y
+	and #$fe
+	cmp #$c4
+	beq l2489
+	dec timer_state
+l2489:	lda (cia+TAHI),y
+	cmp #$cc
+	beq l2491
+	dec timer_state
+l2491:	lda #$09
+	sta (cia+CRB),y
+	lda #$cc
+	sta (cia+TBLO),y
+	sta (cia+TBHI),y
+	lda (cia+TBLO),y
+	cmp #$aa
+	bmi l24a3
+	dec timer_state
+l24a3:	lda (cia+TBHI),y
+	cmp #$aa
+	beq l24ab
+	dec timer_state
+l24ab:	lda #$19
+	ldx #$00
+	sta (cia+CRB),y
+	txa
+	sta (cia+CRB),y
+	lda (cia+TBLO),y
+	and #$fe
+	cmp #$c4
+	beq l24be
+	dec timer_state
+l24be:	lda (cia+TBHI),y
+	cmp #$cc
+	beq l24c6
+	dec timer_state
+l24c6:	dec temp_dec_value
+	bmi l24cd
+	jmp l23d4
+l24cd:	lda #$00
+	sta (cia+TAHI),y
+	sta (cia+TBHI),y
+	lda #$01
+	sta (cia+TBLO),y
+	lda #$08
+	sta (cia+TALO),y
+	lda #$51
+	sta (cia+CRB),y
+	lda #$19
+	sta (cia+CRA),y
+	tax
+l24e4:	dex
+	bne l24e4
+	txa
+	sta (cia+CRA),y
+	sta (cia+CRB),y
+	lda (cia+TBHI),y
+	beq l24f2
+	dec timer_state
+l24f2:	lda (cia+TBLO),y
+	beq l24f8
+	dec timer_state
+l24f8:	lda (cia+TAHI),y
+	cmp #$00
+	beq l2500
+	dec timer_state
+l2500:	lda (cia+TALO),y
+	cmp #$08
+	beq l2508
+	dec timer_state
+l2508:	lda timer_state
+	beq tmrend
+; timer fails
+	lda #$ff
+	sta cia_tmr_fail		; remember timer failed
+	lda #$3b
+	sta pointer2
+	lda #$d3
+	sta pointer2+1			; set screen pointer to color RAM
+	lda CodeBank
+	jsr ColorFaultyChip		; color 6526 U02 - V=0 if already colored
+;	lda #$bf
+;	sta pointer3
+;	lda #$d5
+;	sta pointer3+1
+;	jsr DrawBad			; draw chip "BAD"
+;	lda cia_tod_fail
+;	ldx #$2d			; "TMR"
+;	bne drawtmr			; jump always -> draw text
+	; unused - never reachable
+;	ldx #$34			; "TNT"
+;drawtmr:jsr DrawText			; sub: draw screen text
+tmrend:	rts
+; ----------------------------------------------------------------------------
+; 
+l2527:	lda #$88
+	sta (cia+TALO),y
+	sta (cia+TAHI),y
+	lda (cia+CRA),y
+	ora #$01
+	sta (cia+CRA),y
+	jsr l257e
+	bne l2549
+l2538:	lda #$88
+	sta (cia+TBLO),y
+	sta (cia+TBHI),y
+	lda (cia+CRB),y
+	ora #$01
+	sta (cia+CRB),y
+	jsr l257e
+	bne l2549
+l2549:	jsr cciairq
+	txa
+	sta temp_irq
+	sta (cia+ICR),y
+	ldx #$00
+	stx temp7
+l2555:	lda (cia+ICR),y
+	bne l2567
+	inx
+	bne l2555
+	inc temp7
+	lda #$0f
+	cmp temp7
+	bpl l2555
+	ldx temp7
+	rts
+; ----------------------------------------------------------------------------
+; 
+l2567:	and temp_irq
+	cmp temp_irq
+	beq l256f
+	dec timer_state
+l256f:	cpx #$db
+	beq l2575
+	dec timer_state
+l2575:	ldx temp7
+	cpx #$0a
+	beq l257d
+	dec timer_state
+l257d:	rts
+; ----------------------------------------------------------------------------
+; 
+l257e:	lda #$05
+	clc
+l2581:	sbc #$01
+	bpl l2581
 	rts
 ; ----------------------------------------------------------------------------
 ; enable all CIA interrupts
@@ -1425,6 +1773,29 @@ InitSIDPointer:
 	jsr CopyPointer			; sub: copy table
 	rts
 ; ----------------------------------------------------------------------------
+; 
+l2cb9:	lda #$f0
+	sta $fffa
+	lda #$00
+	sta $fffb
+	lda #$f2
+	sta $fffc
+	lda #$00
+	sta $fffd
+	lda #$f4
+	sta $fffe
+	lda #$00
+	sta $ffff
+	lda #$91
+	sta $f0
+	sta $f2
+	sta $f4
+	lda #$25
+	sta $f1
+	sta $f3
+	sta $f5
+	rts
+; ----------------------------------------------------------------------------
 ; copy $00-Y bytes in codebank from XA to pointer1
 CopyPointer:
 	sta pointer2			; store XA in pointer2
@@ -1528,7 +1899,7 @@ ScreenData:
 	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
 	!scr "         ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
 	!scr "p500test ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
-	!scr "vers 1.1                   02    24 85  "
+	!scr "vers 1.1 82 83 84          02    24 85  "
 ;	!scr "vers 1.1 83 84 04 19 20 82 02    24 85  "				; original
 	!scr "vossi'23                                "
 
