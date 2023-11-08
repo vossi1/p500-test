@@ -34,6 +34,10 @@ LIGHTRED		= $0a
 GRAY1			= $0b
 GRAY2			= $0c
 LIGHTGREEN		= $0d
+; VIC register
+MEMPTR			= $18		; memory pointers
+EXTCOL			= $20		; exterior color
+BGRCOL			= $21		; background color
 ; TPI register
 PC			= $2 *2		; port c
 MIR			= $5 *2		; interrupt mask register
@@ -65,7 +69,7 @@ VOLUME			= $18 *2	; volume
 !addr IndirectBank	= $01		; indirect bank register
 !addr ScreenRAM		= $d000		; Screen RAM
 !addr ColorRAM		= $d400		; Color RAM
-!addr VIC		= $d800		; VIC register
+!addr VIC		= $d800		; VIC address
 ; ***************************************** ZERO PAGE *********************************************
 !addr pointer1		= $10		; 16bit pointer
 !addr bank_state	= $15 ; - $18	; bank faulty state (max 4 banks)
@@ -159,12 +163,12 @@ clrzplp:sta $0000,y
 	ldy #$00
 	ldx #>VIC
 	stx color_pointer+1
-	ldx #$21			; VIC register #21
+	ldx #BGRCOL			; background color
 	stx color_pointer
 	sta (color_pointer),y
 	lda #GRAY1			; code will be increased to GRAY2 in sub
 	sta ext_color
-	jsr SetExteriorColor		; sub: set exterior color VIC register #20
+	jsr SetExteriorColor		; sub: set exterior color
 	lda #GRAY2
 	ldx #$04			; 4 pages to fill
 	stx counter
@@ -259,9 +263,9 @@ noram:	inx				; increase bank
 }
 ; write found banks to screen
 	jsr Hex2Screencode		; sub: calc screencode digits for byte in A to AY
-	lda #$09			; pointer to $d009
+	lda #<(ScreenRAM+9)		; pointer to screen position
 	sta pointer1
-	lda #$d0
+	lda #>(ScreenRAM+9)
 	sta pointer1+1
 	tya				; move lower digit to A
 	ldy #SYSTEMBANK
@@ -309,7 +313,7 @@ ClearScreen:
 	sty pointer1
 	lda #SYSTEMBANK
 	sta IndirectBank		; switch to bank 15
-	ldy #$18			; VIC memory pointers register
+	ldy #MEMPTR			; VIC memory pointers register
 	lda #$41			; clear bit1 CB11 = graphics character set
 	sta (pointer1),y		; store to screen RAM
 	lda #>ScreenRAM			; pointer to screen RAM
@@ -373,9 +377,9 @@ mnxtdig:lda cycles,x			; start with last digit
 	dex
 	bpl mnxtdig			; next digit if 00
 ; write cycles to screen
-mdign00:lda #$20 + 40			; print cycles in line 1  		********* PATCHED *********
+mdign00:lda #<(ScreenRAM+40+32)		; pointer to screen position
 	sta pointer1
-	lda #$d0
+	lda #>(ScreenRAM+40+32)
 	sta pointer1+1			; set screen pointer to cycles counter
 	lda #SYSTEMBANK
 	sta IndirectBank		; switch to systembank
@@ -460,8 +464,8 @@ cciairq:ldy #$00
 ; TOD tests		; ********* added by Vossi **********
 TODTest:
 	sei				; disable interrupts (ALARM test checks reg)
-;	ldx #$35			; "6526 TOD TESTS"
-;	jsr drawtxt			; sub: draw screen text
+	ldx #2				; "TOD TESTS"
+	jsr DrawMessage			; sub: draw message
 	jsr InitCIAPointer		; init cia pointer
 	jsr eciairq			; enable cia irq's
 	ldy #$00
@@ -660,6 +664,8 @@ todok:	cld				; reset decimal flag
 ; ----------------------------------------------------------------------------
 ; test, copy code, switch to new bank
 Test:
+	ldx #3				; "TESTBANK"
+	jsr DrawMessage			; sub: draw message
 	lda #$ff
 	sta test_mask			; test-mask - $ff = test all bits
 	ldy last_rambank
@@ -774,14 +780,14 @@ RamTestBank15:
 	lda #$00
 	sta pointer1			; pointer1 lowbyte = $00
 	sta pointer3
-	lda #>ScreenRAM
+	lda #>(ScreenRAM+40+9)
 	sta pointer3+1			; pointer3 = screen RAM
 	lda IndirectBank
 	sta temp_bank			; remeber sctual test bank	********* PATCHED *********
 	ldy #SYSTEMBANK
 	sty IndirectBank		; switch to bank 15
 	jsr Nibble2Screencode		; convert bank number to screen code
-	ldy #(40*1 + 9)			; Y = line 2 char 6	
+	ldy #<(ScreenRAM+40+9)		; screen posotion test bank number	
 	sta (pointer3),y		; write actual test bank number to screen
 	lda temp_bank
 	sta IndirectBank		; restore test bank			********* PATCHED *********
@@ -1326,11 +1332,40 @@ SetExteriorColor:
 	inc ext_color			; increase exterior color
 	lda #>VIC
 	sta color_pointer+1
-	lda #$20			; VIC register #20
+	lda #EXTCOL			; exterior color
 	sta color_pointer
 	lda ext_color
 	ldy #$00
 	sta (color_pointer),y
+	rts
+; ----------------------------------------------------------------------------
+; Draw Message - X = message number
+DrawMessage:
+	cpx #0
+	beq +				; skip for message 0
+	lda #$00
+-	clc
+	adc #11
+	dex
+	bne -
+	tax
++	lda IndirectBank
+	sta temp_bank			; remember target bank
+	lda #SYSTEMBANK
+	sta IndirectBank		; indirect bank = bank 15
+	lda #<(ScreenRAM+40)
+	sta pointer1
+	lda #>(ScreenRAM+40)
+	sta pointer1+1
+	ldy #$00
+-	lda Messages,x
+	sta (pointer1),y
+	inx
+	iny
+	cpy #11
+	bne -
+	lda temp_bank
+	sta IndirectBank		; restore target bank
 	rts
 ; ----------------------------------------------------------------------------
 ; copies CIA pointer to ZP
@@ -1406,7 +1441,7 @@ CopyPointer:
 Messages:
 	!scr "checksums  "
 	!scr "timertests "
-	!scr "tod-tests  "
+	!scr "tod tests  "
 	!scr "testbank   "
 
 BankScreenPosLo:
