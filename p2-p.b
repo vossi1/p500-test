@@ -70,6 +70,9 @@ VOLUME			= $18 *2	; volume
 !addr ScreenRAM		= $d000		; Screen RAM
 !addr ColorRAM		= $d400		; Color RAM
 !addr VIC		= $d800		; VIC address
+!addr HW_NMI		= $fffa		; system NMI vector
+!addr HW_RESET		= $fffc		; system RESET vector
+!addr HW_IRQ		= $fffe		; system IRQ vector
 ; ***************************************** ZERO PAGE *********************************************
 !addr pointer1		= $10		; 16bit pointer
 !addr bank_state	= $15 ; - $18	; bank faulty state (max 4 banks)
@@ -128,6 +131,9 @@ VOLUME			= $18 *2	; volume
 !addr timer_state	= $bd		; timer state - $00 = ok
 !addr cia_tod_fail	= $be		; 0 = TOD ok, $ff = tod failed
 !addr cia_tmr_fail	= $bf		; 0 = timer ok, $ff = timer failed
+!addr nmi_pointer	= $f0		; nmi pointer
+!addr reset_pointer	= $f2		; reset pointer
+!addr irq_pointer	= $f4		; irq pointer
 ; ***************************************** ZONE MAIN *********************************************
 !zone main
 !initmem FILL
@@ -352,7 +358,7 @@ Main:
 	jsr PlaySound			; play sound
 	jsr SetExteriorColor		; increase exterior color after each cycle
 	jsr ROMChecksums		; calc and print ROM checksums
-;	jsr TimerTest			; timer test
+	jsr TimerTest			; timer test
 	jsr TODTest			; tod test				********** EXTENDED **********
 	jsr DummySub			; Call 19x dummy-subroutine
 	jsr DummySub
@@ -523,7 +529,7 @@ TimerTest:
 	sei
 	ldx #1				; "TIMERTESTS"
 	jsr DrawMessage			; sub: draw message
-	jsr l2cb9
+	jsr InitSystemVectors		; sub: init system hardware vectors
 	jsr InitCIAPointer		; sub: init cia pointer
 	lda #SYSTEMBANK
 	sta IndirectBank
@@ -809,6 +815,9 @@ cciairq:ldy #$00
 	lda (cia+ICR),y			; clear irq reg
 	rts
 ; ----------------------------------------------------------------------------
+; return from
+InterruptHandler:
+	rti				; return from interrupt
 ; TOD tests		; ********* added by Vossi **********
 TODTest:
 	sei				; disable interrupts (ALARM test checks reg)
@@ -1773,27 +1782,28 @@ InitSIDPointer:
 	jsr CopyPointer			; sub: copy table
 	rts
 ; ----------------------------------------------------------------------------
-; 
-l2cb9:	lda #$f0
-	sta $fffa
+; init system vectors for timer test
+InitSystemVectors:
+	lda #nmi_pointer
+	sta HW_NMI
 	lda #$00
-	sta $fffb
-	lda #$f2
-	sta $fffc
+	sta HW_NMI+1
+	lda #reset_pointer
+	sta HW_RESET
 	lda #$00
-	sta $fffd
-	lda #$f4
-	sta $fffe
+	sta HW_RESET+1
+	lda #irq_pointer
+	sta HW_IRQ
 	lda #$00
-	sta $ffff
-	lda #$91
-	sta $f0
-	sta $f2
-	sta $f4
-	lda #$25
-	sta $f1
-	sta $f3
-	sta $f5
+	sta HW_IRQ+1
+	lda #<InterruptHandler
+	sta nmi_pointer
+	sta reset_pointer
+	sta irq_pointer
+	lda #>InterruptHandler
+	sta nmi_pointer+1
+	sta reset_pointer+1
+	sta irq_pointer+1
 	rts
 ; ----------------------------------------------------------------------------
 ; copy $00-Y bytes in codebank from XA to pointer1
