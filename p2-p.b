@@ -12,6 +12,8 @@
 ; fix09 - removed untested chip-numbers - small fix: adr errorbar bank 3 lobyte wrong
 ; first final 1.0
 ; added TOD-Test 1.1
+; added ROM Checksums 1.2
+; added Timer Tests 1.3
 !cpu 6502
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 ; switches
@@ -524,7 +526,7 @@ rsumlp:	clc
 	sta (pointer3),y
 	rts
 ; ----------------------------------------------------------------------------
-; timer tests
+; timer tests		; ********* added by Vossi **********
 TimerTest:
 	sei
 	ldx #1				; "TIMERTESTS"
@@ -534,201 +536,204 @@ TimerTest:
 	lda #SYSTEMBANK
 	sta IndirectBank
 	jsr eciairq
+; test timers with IRQ
 	ldy #$00
 	lda #$00
-	sta (cia+CRB),y
+	sta (cia+CRB),y			; disable timer B
 	lda #$08
-	sta (cia+CRA),y
-	sty timer_state
-	ldx #$01
-	jsr l2527
-	beq l239a
-	dec timer_state
-l239a:	jsr l2549
-	bne l23a1
-	dec timer_state
-l23a1:	ldx #$01
+	sta (cia+CRA),y			; timer A one-shot
+	sty timer_state			; clear fault counter
+	ldx #$01			; irq-bit timer A
+	jsr CheckIRQTimerA		; check timer A IRQ
+	beq tok1
+	dec timer_state			; dec fault counter
+tok1:	jsr CheckIRQ
+	bne tok2
+	dec timer_state			; dec fault counter
+tok2:	ldx #$01
 	lda #$00
-	sta (cia+CRA),y
-	jsr l2527
-	beq l23ae
-	dec timer_state
-l23ae:	ldx #$01
-	jsr l2549
-	beq l23b7
-	dec timer_state
-l23b7:	lda (cia+CRA),y
+	sta (cia+CRA),y			; disable timer A
+	jsr CheckIRQTimerA		; check timer a no IRQ
+	beq tok3
+	dec timer_state			; dec fault counter
+tok3:	ldx #$01
+	jsr CheckIRQ
+	beq tok4
+	dec timer_state			; dec fault counter
+tok4:	lda (cia+CRA),y
 	and #$fe
-	sta (cia+CRA),y
+	sta (cia+CRA),y			; disable mtimer A
 	lda #$08
-	sta (cia+CRB),y
-	ldx #$02
-	jsr l2538
-	beq l23ca
-	dec timer_state
-l23ca:	lda (cia+CRB),y
+	sta (cia+CRB),y			; timer B one shot
+	ldx #$02			; irq-bit timer B
+	jsr CheckIRQTimerB		; check timer B IRQ
+	beq tok5
+	dec timer_state			; dec fault counter
+; test timer regs + load + load force
+tok5:	lda (cia+CRB),y
 	and #$fe
-	sta (cia+CRB),y
-	lda #$40
+	sta (cia+CRB),y			; disable timer B	
+	lda #$40			; test timer regs $40 times
 	sta temp_dec_value
-l23d4:	lda #$00
+tireglp:lda #$00
 	sta (cia+CRA),y
-	sta (cia+CRB),y
+	sta (cia+CRB),y			; clear and stop all timers
 	lda #$55
 	sta (cia+TALO),y
-	sta (cia+TAHI),y
+	sta (cia+TAHI),y		; load with hi
 	lda (cia+TALO),y
-	cmp #$55
-	beq l23e8
-	dec timer_state
-l23e8:	lda (cia+TAHI),y
-	cmp #$55
-	beq l23f0
-	dec timer_state
-l23f0:	lda #$aa
+	cmp #$55			; check timer A lo reg with $55
+	beq tok6
+	dec timer_state			; dec fault counter
+tok6:	lda (cia+TAHI),y
+	cmp #$55			; check timer A hi reg with $55
+	beq tok7
+	dec timer_state			; dec fault counter
+tok7:	lda #$aa
 	sta (cia+TAHI),y
-	sta (cia+TALO),y
+	sta (cia+TALO),y		; load with hi only!		
 	lda (cia+TALO),y
-	cmp #$55
-	beq l23fe
-	dec timer_state
-l23fe:	lda (cia+TAHI),y
-	cmp #$aa
-	beq l2408
+	cmp #$55			; check timer A still $55 because load only with hi
+	beq tok8
+	dec timer_state			; dec fault counter
+tok8:	lda (cia+TAHI),y
+	cmp #$aa			; check timer A hi reg with $aa
+	beq tok9
 	lda #$ff
-	sta timer_state
-l2408:	lda #$10
-	sta (cia+CRA),y
+	sta timer_state			; set fault counter = $ff
+tok9:	lda #$10
+	sta (cia+CRA),y			; timer A force load to load lo
 	lda (cia+TALO),y
-	cmp #$aa
-	beq l2414
-	dec timer_state
-l2414:	lda (cia+TAHI),y
-	cmp #$aa
-	beq l241c
-	dec timer_state
-l241c:	lda #$55
+	cmp #$aa			; check timer A lo reg with $aa
+	beq tok10
+	dec timer_state			; dec fault counter
+tok10:	lda (cia+TAHI),y
+	cmp #$aa			; check timer A hi reg is still $aa
+	beq tok11
+	dec timer_state			; dec fault counter
+tok11:	lda #$55
 	sta (cia+TBLO),y
-l2420:	sta (cia+TBHI),y
+	sta (cia+TBHI),y		; load with hi
 	lda (cia+TBLO),y
-	cmp #$55
-	beq l242a
-	dec timer_state
-l242a:	lda (cia+TBHI),y
-	cmp #$55
-	beq l2432
-	dec timer_state
-l2432:	lda #$aa
+	cmp #$55			; check timer B lo reg with $55
+	beq tok12
+	dec timer_state			; dec fault counter
+tok12:	lda (cia+TBHI),y
+	cmp #$55			; check timer B hi reg with $55
+	beq tok13
+	dec timer_state			; dec fault counter
+tok13:	lda #$aa
 	sta (cia+TBHI),y
-	sta (cia+TBLO),y
+	sta (cia+TBLO),y		; load with hi only!
 	lda (cia+TBLO),y
-	cmp #$55
-	beq l2440
-	dec timer_state
-l2440:	lda (cia+TBHI),y
-	cmp #$aa
-	beq l2448
-	dec timer_state
-l2448:	lda #$10
-	sta (cia+CRB),y
+	cmp #$55			; check timer B still $55 because load only with hi
+	beq tok14
+	dec timer_state			; dec fault counter
+tok14:	lda (cia+TBHI),y
+	cmp #$aa			; check timer B hi reg with $aa
+	beq tok15
+	dec timer_state			; dec fault counter
+tok15:	lda #$10
+	sta (cia+CRB),y			; timer B force load to load lo
 	lda (cia+TBLO),y
-	cmp #$aa
-	beq l2454
-	dec timer_state
-l2454:	lda (cia+TBHI),y
-	cmp #$aa
-	beq l245c
-	dec timer_state
-l245c:	lda #$09
-	sta (cia+CRA),y
+	cmp #$aa			; check timer B hi reg is still $aa
+	beq tok16
+	dec timer_state			; dec fault counter
+tok16:	lda (cia+TBHI),y
+	cmp #$aa			; check timer B lo reg with $aa
+	beq tok17
+	dec timer_state			; dec fault counter
+tok17:	lda #$09
+	sta (cia+CRA),y			; timer A start with one shot
 	lda #$cc
 	sta (cia+TALO),y
-	sta (cia+TAHI),y
+	sta (cia+TAHI),y		; load $cccc in latch only because timer runs
 	lda (cia+TALO),y
-	cmp #$aa
-	bmi l246e
-	dec timer_state
-l246e:	lda (cia+TAHI),y
-	cmp #$aa
-	beq l2476
-	dec timer_state
-l2476:	lda #$19
+	cmp #$aa			; check value not load while timer A runs
+	bmi tok18
+	dec timer_state			; dec fault counter
+tok18:	lda (cia+TAHI),y
+	cmp #$aa			; check value not load while timer A runs
+	beq tok19
+	dec timer_state			; dec fault counter
+tok19:	lda #$19
 	ldx #$00
-	sta (cia+CRA),y
+	sta (cia+CRA),y			; timer A start with one shot, force load
 	txa
-	sta (cia+CRA),y
+	sta (cia+CRA),y			; stop timer A after only a few cycles
 	lda (cia+TALO),y
-	and #$fe
-	cmp #$c4
-	beq l2489
-	dec timer_state
-l2489:	lda (cia+TAHI),y
-	cmp #$cc
-	beq l2491
-	dec timer_state
-l2491:	lda #$09
-	sta (cia+CRB),y
+	and #$fe			; eleminate bit 0
+	cmp #$c4			; check im timer A lo is now $c4 +/- 1 bit
+	beq tok20
+	dec timer_state			; dec fault counter
+tok20:	lda (cia+TAHI),y
+	cmp #$cc			; check timer hi has not changed
+	beq tok21
+	dec timer_state			; dec fault counter
+tok21:	lda #$09
+	sta (cia+CRB),y			; timer B start with one shot
 	lda #$cc
 	sta (cia+TBLO),y
-	sta (cia+TBHI),y
+	sta (cia+TBHI),y		; load $cccc in latch only because timer runs
 	lda (cia+TBLO),y
-	cmp #$aa
-	bmi l24a3
-	dec timer_state
-l24a3:	lda (cia+TBHI),y
-	cmp #$aa
-	beq l24ab
-	dec timer_state
-l24ab:	lda #$19
+	cmp #$aa			; check value not load while timer A runs
+	bmi tok22
+	dec timer_state			; dec fault counter
+tok22:	lda (cia+TBHI),y
+	cmp #$aa			; check value not load while timer A runs
+	beq tok23
+	dec timer_state			; dec fault counter
+tok23:	lda #$19
 	ldx #$00
-	sta (cia+CRB),y
+	sta (cia+CRB),y			; timer B start with one shot, force load
 	txa
-	sta (cia+CRB),y
+	sta (cia+CRB),y			; stop timer B after only a few cycles
 	lda (cia+TBLO),y
-	and #$fe
-	cmp #$c4
-	beq l24be
-	dec timer_state
-l24be:	lda (cia+TBHI),y
-	cmp #$cc
-	beq l24c6
-	dec timer_state
-l24c6:	dec temp_dec_value
-	bmi l24cd
-	jmp l23d4
-l24cd:	lda #$00
+	and #$fe			; eleminate bit 0
+	cmp #$c4			; check im timer A lo is now $c4 +/- 1 bit
+	beq tok24
+	dec timer_state			; dec fault counter
+tok24:	lda (cia+TBHI),y
+	cmp #$cc			; check timer hi has not changed
+	beq tok25
+	dec timer_state			; dec fault counter
+tok25:	dec temp_dec_value
+	bmi tok26
+	jmp tireglp			; repeat $40 times
+;
+tok26:	lda #$00
 	sta (cia+TAHI),y
-	sta (cia+TBHI),y
+	sta (cia+TBHI),y		; clear timers hi
 	lda #$01
-	sta (cia+TBLO),y
+	sta (cia+TBLO),y		; load timer B lo = $01
 	lda #$08
-	sta (cia+TALO),y
+	sta (cia+TALO),y		; load timer A lo = $08
 	lda #$51
-	sta (cia+CRB),y
+	sta (cia+CRB),y			; start timer B, force load, counts underflow of timer A
 	lda #$19
-	sta (cia+CRA),y
-	tax
-l24e4:	dex
-	bne l24e4
-	txa
-	sta (cia+CRA),y
+	sta (cia+CRA),y			; starts timer A, one shot, force load
+	tax				; use $19 as counter
+tdelay	dex
+	bne tdelay			; delay
+	txa				; $00 to a
+	sta (cia+CRA),y			; stop + clear both timers
 	sta (cia+CRB),y
 	lda (cia+TBHI),y
-	beq l24f2
-	dec timer_state
-l24f2:	lda (cia+TBLO),y
-	beq l24f8
-	dec timer_state
-l24f8:	lda (cia+TAHI),y
-	cmp #$00
-	beq l2500
-	dec timer_state
-l2500:	lda (cia+TALO),y
-	cmp #$08
-	beq l2508
-	dec timer_state
-l2508:	lda timer_state
-	beq tmrend
+	beq tok27			; timer B hi should be 0
+	dec timer_state			; dec fault counter
+tok27:	lda (cia+TBLO),y
+	beq tok28			; timer B lo should be 0 because it counted underflow of timer A
+	dec timer_state			; dec fault counter
+tok28:	lda (cia+TAHI),y
+	cmp #$00			; timer A hi should be 0
+	beq tok29
+	dec timer_state			; dec fault counter
+tok29:	lda (cia+TALO),y
+	cmp #$08			; timer A lo $08 because force load
+	beq tok30
+	dec timer_state			; dec fault counter
+tok30:	lda timer_state			; dec fault counter
+	beq tmrend			; skip if test ok
 ; timer fails
 	lda #$ff
 	sta cia_tmr_fail		; remember timer failed
@@ -738,72 +743,69 @@ l2508:	lda timer_state
 	sta pointer2+1			; set screen pointer to color RAM
 	lda CodeBank
 	jsr ColorFaultyChip		; color 6526 U02 - V=0 if already colored
-;	lda #$bf
-;	sta pointer3
-;	lda #$d5
-;	sta pointer3+1
-;	jsr DrawBad			; draw chip "BAD"
-;	lda cia_tod_fail
-;	ldx #$2d			; "TMR"
-;	bne drawtmr			; jump always -> draw text
-	; unused - never reachable
-;	ldx #$34			; "TNT"
-;drawtmr:jsr DrawText			; sub: draw screen text
+	ldx #0				; text tmr
+	jsr PrintChipText		; print text in 6526
 tmrend:	rts
 ; ----------------------------------------------------------------------------
-; 
-l2527:	lda #$88
+; check time A IRQ
+CheckIRQTimerA:
+	lda #$88			; set timer A to $8888
 	sta (cia+TALO),y
 	sta (cia+TAHI),y
 	lda (cia+CRA),y
 	ora #$01
-	sta (cia+CRA),y
-	jsr l257e
-	bne l2549
-l2538:	lda #$88
+	sta (cia+CRA),y			; start timer A
+	jsr Delay
+	bne CheckIRQ			; jump always
+; check timer B IRQ
+CheckIRQTimerB:
+	lda #$88			; set timer B to $8888
 	sta (cia+TBLO),y
 	sta (cia+TBHI),y
 	lda (cia+CRB),y
 	ora #$01
 	sta (cia+CRB),y
-	jsr l257e
-	bne l2549
-l2549:	jsr cciairq
+	jsr Delay
+	bne CheckIRQ			; jump always
+CheckIRQ:
+	jsr cciairq			; clear IRQ reg
 	txa
-	sta temp_irq
-	sta (cia+ICR),y
-	ldx #$00
-	stx temp7
-l2555:	lda (cia+ICR),y
-	bne l2567
+	sta temp_irq			; remember irq bit from x for timer
+	sta (cia+ICR),y			; clear mask bit for timer IRQ
+	ldx #$00			; reset counter for waiting for IRQ
+	stx temp3			; reset hi counter for waiting
+irqlp:	lda (cia+ICR),y			; load IRQ reg
+	bne CheckTimerIRQok
 	inx
-	bne l2555
-	inc temp7
+	bne irqlp			; wait for IRQ
+	inc temp3
 	lda #$0f
-	cmp temp7
-	bpl l2555
-	ldx temp7
-	rts
+	cmp temp3
+	bpl irqlp			; wait for IRQ
+	ldx temp3
+	rts				; returns X=$0a if no IRQ occured
 ; ----------------------------------------------------------------------------
-; 
-l2567:	and temp_irq
-	cmp temp_irq
-	beq l256f
-	dec timer_state
-l256f:	cpx #$db
-	beq l2575
-	dec timer_state
-l2575:	ldx temp7
+; check if correct IRQ + time
+CheckTimerIRQok:
+	and temp_irq			; isolate timer IRQ bit
+	cmp temp_irq			; check if timer IRQ bit set?
+	beq irqok			; skip if IRQ ok
+	dec timer_state			; dec fault counter
+irqok:	cpx #$db			; compare time
+	beq timelok			; skip if IRQ ok
+	dec timer_state			; dec fault counter
+timelok:ldx temp3
 	cpx #$0a
-	beq l257d
-	dec timer_state
-l257d:	rts
+	beq timehok
+	dec timer_state			; dec fault counter
+timehok:rts
 ; ----------------------------------------------------------------------------
-; 
-l257e:	lda #$05
+; Delay
+Delay:
+	lda #$05
 	clc
-l2581:	sbc #$01
-	bpl l2581
+-	sbc #$01
+	bpl -
 	rts
 ; ----------------------------------------------------------------------------
 ; enable all CIA interrupts
@@ -926,11 +928,10 @@ todfail:lda #$ff
 	sta pointer2+1			; set screen pointer to color RAM
 	lda CodeBank
 	jsr ColorFaultyChip		; color 6526 U02 - V=0 if already colored
-;	lda cia_tmr_fail
-;	bne todend			; skip if timer already failed 
-;	ldx #$33			; "TOD"
-;	bne drawtod			; jump always -> draw text
-;drawtod:jsr drawtxt			; sub: draw screen text
+	lda cia_tmr_fail
+	bne todend			; skip if timer already failed 
+	ldx #1				; text tod
+	jsr PrintChipText		; print text in 6526
 todend:	rts
 ; ----------------------------------------------------------------------------
 ; set TOD to time1 and set time2 = time1 + one 10th
@@ -1702,7 +1703,7 @@ DrawMessage:
 	beq +				; skip for message 0
 	lda #$00
 -	clc
-	adc #11
+	adc #11				; add 11 chars for next message
 	dex
 	bne -
 	tax
@@ -1723,6 +1724,43 @@ DrawMessage:
 	bne -
 	lda temp_bank
 	sta IndirectBank		; restore target bank
+	rts
+; ----------------------------------------------------------------------------
+; print text in 6526
+PrintChipText:
+	cpx #0
+	beq +				; skip for text 0
+	lda #$00
+	tay			
+-	clc
+	adc #3				; add 3 char for next text
+	dex
+	bne -
+	tax
++	ldy #$00
+	lda #<(ScreenRAM+40*20+28)	; screen position lo
+	sta pointer3
+	lda #>(ScreenRAM+40*20+28)	; screen pos hi
+	sta pointer3+1
+	lda ChipTexts,x
+	ora #$80			; reverse
+	sta (pointer3),y		; print to screen
+	lda #<(ScreenRAM+40*21+28)	; screen position lo
+	sta pointer3
+	lda #>(ScreenRAM+40*21+28)	; screen pos hi
+	sta pointer3+1
+	inx
+	lda ChipTexts,x
+	ora #$80			; reverse
+	sta (pointer3),y		; print to screen
+	lda #<(ScreenRAM+40*22+28)	; screen position lo
+	sta pointer3
+	lda #>(ScreenRAM+40*22+28)	; screen pos hi
+	sta pointer3+1
+	inx
+	lda ChipTexts,x
+	ora #$80			; reverse
+	sta (pointer3),y		; print to screen
 	rts
 ; ----------------------------------------------------------------------------
 ; copies CIA pointer to ZP
@@ -1825,6 +1863,10 @@ Messages:
 	!scr "tod tests  "
 	!scr "testbank   "
 
+ChipTexts:
+	!scr "tmr"
+	!scr "tod"
+
 BankScreenPosLo:
 	!byte $89, $a9, $49, $e9 ; ************ patched last byte to first
 
@@ -1909,7 +1951,7 @@ ScreenData:
 	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
 	!scr "         ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
 	!scr "p500test ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
-	!scr "vers 1.1 82 83 84          02    24 85  "
+	!scr "vers 1.3 82 83 84          02    24 85  "
 ;	!scr "vers 1.1 83 84 04 19 20 82 02    24 85  "				; original
 	!scr "vossi'23                                "
 
