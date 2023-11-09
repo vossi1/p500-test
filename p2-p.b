@@ -117,7 +117,6 @@ VOLUME			= $18 *2	; volume
 !addr tpi2		= $92 ; -$a1	; TPI2 register table - unused -
 !addr cia		= $92 ; -$b1	; CIA register table
 !addr acia		= $92 ; -$99	; ACIA register table - unused -
-
 !addr time1_hours	= $b2		; time 1 hours
 !addr time1_minutes	= $b3		; time 1 minutes
 !addr time1_seconds	= $b4		; time 1 seconds
@@ -131,8 +130,6 @@ VOLUME			= $18 *2	; volume
 !addr tod_count3	= $bc		; tod test counter
 !addr tod_state		= $bd		; TOD state - $00 ok, $ff = bad
 !addr timer_state	= $bd		; timer state - $00 = ok
-!addr cia_tod_fail	= $be		; 0 = TOD ok, $ff = tod failed
-!addr cia_tmr_fail	= $bf		; 0 = timer ok, $ff = timer failed
 !addr nmi_pointer	= $f0		; nmi pointer
 !addr reset_pointer	= $f2		; reset pointer
 !addr irq_pointer	= $f4		; irq pointer
@@ -735,8 +732,6 @@ tok29:	lda (cia+TALO),y
 tok30:	lda timer_state			; dec fault counter
 	beq tmrend			; skip if test ok
 ; timer fails
-	lda #$ff
-	sta cia_tmr_fail		; remember timer failed
 	lda #$3b
 	sta pointer2
 	lda #$d3
@@ -920,16 +915,12 @@ alarmlp:lda (cia+ICR),y
 chkalar:cmp #$04			; test ALARM irq bit
 	beq todend			; skip if tod ALARM OK	
 ; tod fails
-todfail:lda #$ff
-	sta cia_tod_fail		; remember tod failed
-	lda #$3b
+todfail:lda #$3b
 	sta pointer2
 	lda #$d3
 	sta pointer2+1			; set screen pointer to color RAM
 	lda CodeBank
 	jsr ColorFaultyChip		; color 6526 U02 - V=0 if already colored
-	lda cia_tmr_fail
-	bne todend			; skip if timer already failed 
 	ldx #1				; text tod
 	jsr PrintChipText		; print text in 6526
 todend:	rts
@@ -1726,37 +1717,27 @@ DrawMessage:
 	sta IndirectBank		; restore target bank
 	rts
 ; ----------------------------------------------------------------------------
-; print text in 6526
+; print text number x in 6526 chip
 PrintChipText:
-	cpx #0
-	beq +				; skip for text 0
-	lda #$00
-	tay			
--	clc
-	adc #3				; add 3 char for next text
-	dex
-	bne -
-	tax
-+	ldy #$00
-	lda #<(ScreenRAM+40*20+28)	; screen position lo
+	txa				; message number = text column
+	clc
+	adc #<(ScreenRAM+40*20+27)	; add screen position lo
 	sta pointer3
-	lda #>(ScreenRAM+40*20+28)	; screen pos hi
+	lda #>(ScreenRAM+40*20+27)	; screen pos hi (already in last screen page)
 	sta pointer3+1
+	cpx #0
+	beq +				; skip for text tmr
+	ldx #3				; message tod
++	ldy #0				; line 0
 	lda ChipTexts,x
 	ora #$80			; reverse
 	sta (pointer3),y		; print to screen
-	lda #<(ScreenRAM+40*21+28)	; screen position lo
-	sta pointer3
-	lda #>(ScreenRAM+40*21+28)	; screen pos hi
-	sta pointer3+1
+	ldy #40				; next 1
 	inx
 	lda ChipTexts,x
 	ora #$80			; reverse
 	sta (pointer3),y		; print to screen
-	lda #<(ScreenRAM+40*22+28)	; screen position lo
-	sta pointer3
-	lda #>(ScreenRAM+40*22+28)	; screen pos hi
-	sta pointer3+1
+	ldy #80				; next 2
 	inx
 	lda ChipTexts,x
 	ora #$80			; reverse
@@ -1859,7 +1840,7 @@ CopyPointer:
 !zone tables
 Messages:
 	!scr "checksums  "
-	!scr "timertests "
+	!scr "timertest  "
 	!scr "tod tests  "
 	!scr "testbank   "
 
