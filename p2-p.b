@@ -36,6 +36,8 @@ LIGHTRED		= $0a
 GRAY1			= $0b
 GRAY2			= $0c
 LIGHTGREEN		= $0d
+; test parameters
+TIMERCYCLES		= $0a70		; compare cycles (determined with a LA and a real P500)
 ; VIC register
 MEMPTR			= $18		; memory pointers
 EXTCOL			= $20		; exterior color
@@ -787,11 +789,11 @@ CheckTimerIRQok:
 	cmp temp_irq			; check if timer IRQ bit set?
 	beq irqok			; skip if IRQ ok
 	dec timer_state			; dec fault counter
-irqok:	cpx #$db			; compare time
+irqok:	cpx #<TIMERCYCLES		; compare cycles lo (determined with a LA and a real P500)
 	beq timelok			; skip if IRQ ok
 	dec timer_state			; dec fault counter
 timelok:ldx temp3
-	cpx #$0a
+	cpx #>TIMERCYCLES		; compare cycles hi (determined with a LA and a real P500)
 	beq timehok
 	dec timer_state			; dec fault counter
 timehok:rts
