@@ -69,6 +69,7 @@ VOLUME			= $18 *2	; volume
 ; ***************************************** ADDRESSES *********************************************
 !addr CodeBank		= $00		; code bank register
 !addr IndirectBank	= $01		; indirect bank register
+!addr MemZero		= $0000
 !addr ScreenRAM		= $d000		; Screen RAM
 !addr ColorRAM		= $d400		; Color RAM
 !addr VIC		= $d800		; VIC address
@@ -148,7 +149,7 @@ Start:
 ; init
 	ldy #$02			; clear zero page
 	lda #$00
-clrzplp:sta $0000,y
+clrzplp:sta MemZero,y			; $0000
 	iny
 	bne clrzplp
 ; draw screen
@@ -1746,7 +1747,7 @@ PrintChipText:
 ; ----------------------------------------------------------------------------
 ; copies CIA pointer to ZP
 InitCIAPointer:
-	lda #cia			; cia pointer in ZP
+	lda #<cia			; cia pointer in ZP
 	sta pointer1
 	lda #$00
 	sta pointer1+1
@@ -1757,7 +1758,7 @@ InitCIAPointer:
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies Triport2 pointer to ZP
-	lda #tpi2	
+	lda #<tpi2	
 	sta pointer1
 	lda #$00
 	sta pointer1+1
@@ -1768,7 +1769,7 @@ InitCIAPointer:
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies Triport1 pointer to ZP
-	lda #tpi1	
+	lda #<tpi1	
 	sta pointer1
 	lda #$00
 	sta pointer1+1
@@ -1779,7 +1780,7 @@ InitCIAPointer:
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies ACIA pointer to ZP
-	lda #acia	
+	lda #<acia	
 	sta pointer1
 	lda #$00
 	sta pointer1+1
@@ -1791,7 +1792,7 @@ InitCIAPointer:
 ; ----------------------------------------------------------------------------
 ; copy sid-pointer-table to zeropage for indirect access
 InitSIDPointer:
-	lda #sid			; sid pointer in ZP
+	lda #<sid			; sid pointer in ZP
 	sta pointer1
 	lda #$00
 	sta pointer1+1
@@ -1803,16 +1804,16 @@ InitSIDPointer:
 ; ----------------------------------------------------------------------------
 ; init system vectors for timer test
 InitSystemVectors:
-	lda #nmi_pointer
+	lda #<nmi_pointer
 	sta HW_NMI
 	lda #$00
 	sta HW_NMI+1
-	lda #reset_pointer
+	lda #<reset_pointer
 	sta HW_RESET
 	lda #$00
 	sta HW_RESET+1
-	lda #irq_pointer
-	sta HW_IRQ
+	lda #<irq_pointer
+	sta HW_IRQ 
 	lda #$00
 	sta HW_IRQ+1
 	lda #<InterruptHandler
