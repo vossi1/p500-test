@@ -14,6 +14,7 @@
 ; added TOD-Test 1.1
 ; added ROM Checksums 1.2
 ; added Timer Tests 1.3
+; added RAM Test Messages 1.4, fix10 CopyMemory $0000 detection
 !cpu 6502
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 ; switches
@@ -1877,7 +1878,7 @@ Messages:
 	!scr "-adr 5a  "
 	!scr "+adr ff  "
 	!scr "-adr 00  "
-	!scr "stat.ram "
+	!scr "static   "
 
 ChipTexts:
 	!scr "tmr"
@@ -1967,7 +1968,7 @@ ScreenData:
 	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
 	!scr "         ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
 	!scr "         ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
-	!scr "v. 1.3   82 83 84          02    24 85  "
+	!scr "v. 1.4   82 83 84          02    24 85  "
 ;	!scr "vers 1.1 83 84 04 19 20 82 02    24 85  "				; original
 	!scr "vossi'23                                "
 
