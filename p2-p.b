@@ -79,13 +79,15 @@ VOLUME			= $18 *2	; volume
 !addr HW_RESET		= $fffc		; system RESET vector
 !addr HW_IRQ		= $fffe		; system IRQ vector
 ; ***************************************** ZERO PAGE *********************************************
-!addr pointer1		= $10		; 16bit pointer
+!addr check		= $10		; check variable ********* PATCHED ********
+!addr error		= $11		; error ********* PATCHED ********
+!addr pointer1		= $12		; 16bit pointer
 !addr bank_state	= $15 ; - $18	; bank faulty state (max 4 banks)
 !addr bank_state_full	= $0015
 !addr ext_color		= $1b		; exterior color
 !addr cycles		= $21 ; - $24	; cycles counter decimal for 8 digits
-!addr test_pages	= $25		; pages to test
-!addr temp2		= $26		; temp variable
+!addr end_high	= $25		; pages to test
+!addr temp2		= $26		; temp
 !addr faulty_bits	= $27		; faulty test bits
 !addr storage1		= $28		; temp storage
 !addr storage2		= $29		; temp storage
@@ -102,15 +104,13 @@ VOLUME			= $18 *2	; volume
 !addr temp6		= $3f		; temp6	
 !addr start_high	= $41		; test start address highbyte	
 !addr start_low		= $42		; test start address lowbyte	
-!addr temp1		= $43		; temp variable
-!addr temp3		= $44		; temp variable
-!addr temp4		= $45		; temp variable
-!addr check		= $46		; check variable
-!addr error		= $47		; error state
+!addr temp1		= $43		; temp
+!addr temp3		= $44		; temp
+!addr temp4		= $45		; temp
 !addr temp7		= $48		; temp timer test
-!addr temp5		= $49		; temp variable
+!addr temp5		= $49		; temp
 !addr banks_counter	= $4a		; counter for banks to test in a cycle
-!addr temp_bank		= $4b		; temp bank variable
+!addr temp_bank		= $4b		; temp bank
 !addr temp_dec_value	= $4c		; temp timertest
 !addr temp_irq		= $4d		; temp irq
 !addr pointer2		= $4e		; 16bit pointer
@@ -169,7 +169,7 @@ clrzplp:sta MemZero,y			; $0000
 	lda #SYSTEMBANK			; target = Bank 15
 	sta copy_target_bank
 	ldx #$04			; 4 pages to copy
-	jsr CopyMemory			; sub: draw screen
+	jsr CopyMemory			; copy screen
 ; color screen
 	ldx #SYSTEMBANK			; set indirect bank to 15
 	stx IndirectBank
@@ -182,7 +182,7 @@ clrzplp:sta MemZero,y			; $0000
 	sta (color_pointer),y
 	lda #GRAY1			; code will be increased to GRAY2 in sub
 	sta ext_color
-	jsr SetExteriorColor		; sub: set exterior color
+	jsr SetExteriorColor		; set exterior color
 	lda #GRAY2
 	ldx #$04			; 4 pages to fill
 	stx counter
@@ -191,7 +191,7 @@ clrzplp:sta MemZero,y			; $0000
 	ldx #$00
 	stx color_pointer
 	ldy #$00			; start with full page		original $ff ********* PATCHED *********
-	jsr FillColor			; sub: fill memory - complete color RAM with light grey
+	jsr FillColor			; fill memory - complete color RAM with light grey
 	ldx #$01			; <1 page to fill
 	stx counter
 	ldx #$d4			; colorpointer to $d40b in color RAM
@@ -200,7 +200,7 @@ clrzplp:sta MemZero,y			; $0000
 	stx color_pointer
 	lda #ORANGE
 	ldy #$11			; 17 bytes to fill
-	jsr FillColor			; sub: fill memory - color line 0 column 12-28 = orange
+	jsr FillColor			; fill memory - color line 0 column 12-28 = orange
 	lda #YELLOW
 	ldy #$00			; byte 0
 	ldx #$d4			; colorpointer to $d40b in color RAM
@@ -214,14 +214,14 @@ clrzplp:sta MemZero,y			; $0000
 	ldx #$32			; colorpointer to $d432
 	stx color_pointer
 	inc counter			; <1 page to fill
-	jsr FillColor			; sub: fill memory - color line 1 column 11-29 = yellow
+	jsr FillColor			; fill memory - color line 1 column 11-29 = yellow
 	dec color_pointer+1		; reset colorpointer highbyte to $d4
 	lda #WHITE
 	inc counter			; <1 page to fill
 	ldx #$60			; colorpointer to $d460
 	stx color_pointer
 	ldy #$08			; 8 bytes
-	jsr FillColor			; sub: fill memory - color line 2 column 17-25 = white
+	jsr FillColor			; fill memory - color line 2 column 17-25 = white
 	lda #CYAN
 	ldy #$1d			; 29 bytes
 	inc counter			; <1 page to fill
@@ -229,33 +229,33 @@ clrzplp:sta MemZero,y			; $0000
 	stx color_pointer+1
 	ldx #$20
 	stx color_pointer
-	jsr FillColor			; sub: fill memory - color line 7 column 1-29
+	jsr FillColor			; fill memory - color line 7 column 1-29
 	inc counter
 	dec color_pointer+1		; colorpointer to $d5c0
 	ldx #$c0
 	stx color_pointer
 	ldy #$1d
-	jsr FillColor			; sub: fill memory - color line 11 column 1-29
+	jsr FillColor			; fill memory - color line 11 column 1-29
 	inc counter			; <1 page to fill
 	ldx #$d6			; colorpointer to $d660
 	stx color_pointer+1
 	ldx #$60
 	stx color_pointer
 	ldy #$1d
-	jsr FillColor			; sub: fill memory - color line 15 column 1-29
+	jsr FillColor			; fill memory - color line 15 column 1-29
 	inc counter			; <1 page to fill
 	ldx #$d7			; colorpointer to $d700
 	stx color_pointer+1
 	ldx #$00
 	stx color_pointer
 	ldy #$1d
-	jsr FillColor			; sub: fill memory - color line 19 column 1-29
+	jsr FillColor			; fill memory - color line 19 column 1-29
 	inc counter			; <1 page to fill
 	dec color_pointer+1		; colorpointer to $d7a0
 	ldx #$a0
 	stx color_pointer
 	ldy #$1d
-	jsr FillColor			; sub: fill memory - color line 23 column 1-29
+	jsr FillColor			; fill memory - color line 23 column 1-29
 	ldx #$00
 ; search RAM banks
 findram:stx IndirectBank		; switch to indirect bank 0
@@ -263,7 +263,7 @@ findram:stx IndirectBank		; switch to indirect bank 0
 	sta pointer1+1
 	lda #$00
 	sta pointer1
-	jsr SearchRAM			; sub: search for RAM - Z=1 RAM found
+	jsr SearchRAM			; search for RAM - Z=1 RAM found
 	bmi noram			; skip if no RAM found
 	inc last_rambank		; increase RAM bank present counter
 noram:	inx				; increase bank
@@ -276,7 +276,7 @@ noram:	inx				; increase bank
 	lda last_rambank		; load RAM banks
 }
 ; write found banks to screen
-	jsr Hex2Screencode		; sub: calc screencode digits for byte in A to AY
+	jsr Hex2Screencode		; calc screencode digits for byte in A to AY
 	lda #<(ScreenRAM+9)		; pointer to screen position
 	sta pointer1
 	lda #>(ScreenRAM+9)
@@ -381,7 +381,7 @@ Main:
 	jsr DummySub
 	jsr DummySub
 	jsr DummySub
-	jsr Test			; sub: test, copy code, switch to new bank
+	jsr Test			; test, copy code, switch to new bank
 ; increase cycles counter
 	ldx #$03			; 3 digits for cycles
 	sed				; switch do decimal mode
@@ -410,11 +410,11 @@ mnotlst:lda cycles,x
 	beq mskpzer
 	and #$f0			; clear lower nibble
 	beq mprtdig			; print if < 10
-mprtnxt:jsr UpperNibble2Screencode	; sub: convert upper nibble to digit screencode
+mprtnxt:jsr UpperNibble2Screencode	; convert upper nibble to digit screencode
 	sta (pointer1),y		; print upper nibble
 	iny
 mprtdig:lda cycles,x			; load digit again
-	jsr Nibble2Screencode		; sub: convert nibble to digit screencode
+	jsr Nibble2Screencode		; convert nibble to digit screencode
 	sta (pointer1),y		; write digit to screen
 	iny				; increase screen pointer to next place
 	inx				; increase digit counter
@@ -471,7 +471,7 @@ PlaySound:
 ; calc and print rom checksums
 ROMChecksums:
 	ldx #0				; "CHECKSUMS"
-	jsr DrawMessage			; sub: draw message
+	jsr DrawMessage			; draw message
 	lda #SYSTEMBANK
 	sta IndirectBank		; systembank
 	ldy #$00			; first screen position
@@ -530,9 +530,9 @@ rsumlp:	clc
 TimerTest:
 	sei
 	ldx #1				; "TIMERTESTS"
-	jsr DrawMessage			; sub: draw message
-	jsr InitSystemVectors		; sub: init system hardware vectors
-	jsr InitCIAPointer		; sub: init cia pointer
+	jsr DrawMessage			; draw message
+	jsr InitSystemVectors		; init system hardware vectors
+	jsr InitCIAPointer		; init cia pointer
 	lda #SYSTEMBANK
 	sta IndirectBank
 	jsr eciairq
@@ -822,7 +822,7 @@ InterruptHandler:
 TODTest:
 	sei				; disable interrupts (ALARM test checks reg)
 	ldx #2				; "TOD TESTS"
-	jsr DrawMessage			; sub: draw message
+	jsr DrawMessage			; draw message
 	jsr InitCIAPointer		; init cia pointer
 	jsr eciairq			; enable cia irq's
 	ldy #$00
@@ -1017,7 +1017,7 @@ todok:	cld				; reset decimal flag
 ; test, copy code, switch to new bank
 Test:
 	ldx #3				; "TESTBANK"
-	jsr DrawMessage			; sub: draw message
+	jsr DrawMessage			; draw message
 	lda #$ff
 	sta test_mask			; test-mask - $ff = test all bits
 	ldy last_rambank
@@ -1032,7 +1032,7 @@ tstnxbk:stx copy_target_bank
 ;	stx $31				; remember target (test) bank $31
 	ldx copy_target_bank
 	stx IndirectBank		; set indirect bank = target bank
-	jsr RAMTest			; sub: RAM Test - bank below code or last bank
+	jsr RAMTest			; RAM Test - bank below code or last bank
 	ldx copy_target_bank
 	stx copy_source_bank		; source bank = last test bank
 	dex				; decrease bank
@@ -1059,9 +1059,9 @@ tstcpcd:stx temp5
 	txa
 	ldx #$00
 	ldy #$00
-	jsr SetCopyTarget		; sub: set copy target = new codebank, start=$0000
+	jsr SetCopyTarget		; set copy target = new codebank, start=$0000
 	lda CodeBank
-	jsr SetCopySource		; sub: set copy source = actual codebank, start=$0000
+	jsr SetCopySource		; set copy source = actual codebank, start=$0000
 	ldx #CODESIZE			; code size in pages to copy
 	inx				; increase one page
 	jsr CopyMemory			; copy code to new bank
@@ -1084,11 +1084,12 @@ tstnocb:jsr TestBank15			; test ram areas in bank 15
 ; ----------------------------------------------------------------------------
 ; Test RAMareas in bank 15
 TestBank15:
+	; STATIC RAM
 	lda #SYSTEMBANK
 	sta IndirectBank		; switch to bank 15
-	ldy #$02
-	ldx #$00
-	lda #$08
+	ldy #$02			; start address low
+	ldx #$00			; start address high
+	lda #$08			; pages
 	jsr RamTestBank15		; test $0002-$0800 = 6116 ZP
 	lda CodeBank
 	ldx #>ScreenRAM
@@ -1120,13 +1121,13 @@ TestBank15:
 ; ----------------------------------------------------------------------------
 ; RAM test
 RAMTest:	
-	lda #$00			; test start address = $0002
-	tax
-	ldy #$02			; test start address 
+	lda #$00			; test end address high 00 = full bank
+	tax				; test start address $0002 high
+	ldy #$02			; test start address $0002 low
 RamTestBank15:	
 	sty start_low			; remember start address lowbyte (start with $02)
 	stx start_high			; remember start address highbyte
-	sta test_pages			; $00 = test all pages
+	sta end_high			; $00 = test all pages
 	dey
 	sty temp2			; remember last test page for downwards test end check
 	lda #$00
@@ -1146,6 +1147,7 @@ RamTestBank15:
 	cmp #$0f			; check if target = bank 15
 	beq notbnkf			; skip if not bank 15
 	jsr PlaySound			; play sound
+	; LOADRTEST *********************************************************
 notbnkf:ldy start_low			; start with Y = $02
 	lda start_high
 	sta pointer1+1			; start with page $00
@@ -1162,7 +1164,7 @@ test1lp:tya				; Y as test-byte
 	bne test1lp			; next byte
 	inc pointer1+1			; increase highbyte
 	lda pointer1+1
-	cmp test_pages			; check if last test page
+	cmp end_high			; check if last test page
 	bne test1lp			; next page
 	jsr ResetStartAddress		; reset start address for next test
 ; test 2 with address highbyte
@@ -1184,7 +1186,7 @@ test2lp:tya
 	bne test2lp
 	inc pointer1+1
 	lda pointer1+1
-	cmp test_pages
+	cmp end_high
 	bne test2lp
 	jsr PlaySound			; play sound
 	jsr ResetStartAddress		; reset start address for next test
@@ -1222,7 +1224,7 @@ test3lp:lda (pointer1),y		; check byte from last test again
 	bne test3lp
 	inc pointer1+1
 	lda pointer1+1
-	cmp test_pages
+	cmp end_high
 	bne test3lp
 	jsr ResetStartAddress		; reset start address for next test
 ; test 4 first byte with $aa, second with $55
@@ -1255,7 +1257,7 @@ l23c1:	lda #$55
 	bne test4lp
 	inc pointer1+1
 	lda pointer1+1
-	cmp test_pages
+	cmp end_high
 	bne test4lp
 	jsr PlaySound			; play sound
 	jsr ResetStartAddress		; reset start address for next test
@@ -1291,7 +1293,7 @@ test5lp:lda (pointer1),y		; check byte from last test again
 	bne test5lp
 	inc pointer1+1
 	lda pointer1+1
-	cmp test_pages
+	cmp end_high
 	bne test5lp
 	jsr MaxStartAddress		; set address to maximum
 ; test 6 with $a5 downwards
@@ -1393,7 +1395,7 @@ test8lp:lda (pointer1),y		; check byte from last test again
 	bne test8lp			; next byte
 	inc pointer1+1
 	lda pointer1+1
-	cmp test_pages
+	cmp end_high
 	bne test8lp			; next page
 	jsr PlaySound			; play sound
 	jsr MaxStartAddress		; set address to maximum
@@ -1577,7 +1579,7 @@ ResetStartAddress:
 ; ----------------------------------------------------------------------------
 ; Set RAM Test start address to last byte
 MaxStartAddress
-	ldy test_pages
+	ldy end_high
 	dey
 	sty pointer1+1
 	ldy #$ff
@@ -1585,43 +1587,42 @@ MaxStartAddress
 ; ----------------------------------------------------------------------------
 ; memory copy sub - copies counter pages from source to target
 CopyMemory:
-	stx counter			; save pages to copy to counter $35, temp $43
+	stx counter			; save pages to copy to counter, temp1
 	stx temp1
 	ldx IndirectBank		; save indirect bank to temp_bank
 	stx temp_bank
 	ldy #$00			; start low byte Y = $00
 	cpy copy_target+1
-	bne +				; skip if target higbyte is $00
+	bne copy			; skip if target higbyte is not $00
 	ldy #$02			; start low byte = $02 if page 0
-+	sty temp6			; remember start low byte
--	ldx copy_source_bank
+copy:	sty temp6			; remember start low byte
+copylp:	ldx copy_source_bank
 	stx IndirectBank		; set source bank
 	lda (copy_source),y		; load source byte
 	ldx copy_target_bank		; set target bank
 	stx IndirectBank
 	sta (copy_target),y		; save byte to target
 	iny
-	bne -				; copy next byte
+	bne copylp			; copy next byte
 	inc copy_source+1		; increase high bytes
 	inc copy_target+1
 	dec counter			; decrease page counter
-	bne -				; copy next page
-
+	bne copylp			; copy next page
+; check copy
 	lda temp1			; restore page to counter
 	sta counter
-	lda #$00			; clear $47
+	lda #$00			; clear error
 	sta error
 	ldy temp6			; load start low byte
-	lda temp3			; check if temp4 = $00
-	ora temp4
-	and temp4
-	bne +				; skip if $45 not $00
-	ldy #$48			; start at low byte $48
-+	lda temp3
-	sta copy_source+1		; source high byte = $44
+	lda temp4			; load target high ********* PATCHED *********
+	ora copy_target			; or target low
+	bne chkcopy			; skip if target is not $0000
+	ldy #$12			; start at low byte $12 above check+error vars
+chkcopy:lda temp3
+	sta copy_source+1		; save copy source high
 	lda temp4
-	sta copy_target+1		; target high byte = $45
--	ldx copy_source_bank		; set source bank
+	sta copy_target+1		; save copy target high
+checklp:ldx copy_source_bank		; set source bank
 	stx IndirectBank
 	lda (copy_source),y		; load source byte
 	sta check			; save to check
@@ -1632,11 +1633,11 @@ CopyMemory:
 	ora error			; add state to error variable  
 	sta error			; save new state
 	iny
-	bne -				; check next byte
+	bne checklp			; check next byte
 	inc copy_source+1		; increase high bytes
 	inc copy_target+1
 	dec counter			; decrease page counter
-	bne -				; check next page
+	bne checklp			; check next page
 	ldx temp_bank			; restore indirect bank
 	stx IndirectBank
 	lda error			; return error state 0=ok, 1=error
@@ -1756,7 +1757,7 @@ InitCIAPointer:
 	lda #<CIARegs			; XA = CIATable
 	ldx #>CIARegs
 	ldy #$1f			; bytes to copy = $00-$1f
-	jsr CopyPointer			; sub: copy register pointer
+	jsr CopyPointer			; copy register pointer
 	rts
 ; ----------------------------------------------------------------------------
 ; unused - copies Triport2 pointer to ZP
@@ -1801,7 +1802,7 @@ InitSIDPointer:
 	lda #<SIDRegs			; XA = SIDTable
 	ldx #>SIDRegs
 	ldy #$39			; bytes to copy = $00-$39
-	jsr CopyPointer			; sub: copy table
+	jsr CopyPointer			; copy table
 	rts
 ; ----------------------------------------------------------------------------
 ; init system vectors for timer test
@@ -1934,8 +1935,8 @@ ScreenData:
 
 	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
 	!scr "         ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
-	!scr "p500test ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
-	!scr "vers 1.3 82 83 84          02    24 85  "
+	!scr "         ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
+	!scr "v 1.3    82 83 84          02    24 85  "
 ;	!scr "vers 1.1 83 84 04 19 20 82 02    24 85  "				; original
 	!scr "vossi'23                                "
 
