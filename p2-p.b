@@ -85,8 +85,9 @@ VOLUME			= $18 *2	; volume
 !addr bank_state	= $15 ; - $18	; bank faulty state (max 4 banks)
 !addr bank_state_full	= $0015
 !addr ext_color		= $1b		; exterior color
+!addr screen_pointer	= $1c		; 16bit pointer screen
 !addr cycles		= $21 ; - $24	; cycles counter decimal for 8 digits
-!addr end_high	= $25		; pages to test
+!addr end_high		= $25		; pages to test
 !addr temp2		= $26		; temp
 !addr faulty_bits	= $27		; faulty test bits
 !addr storage1		= $28		; temp storage
@@ -107,6 +108,7 @@ VOLUME			= $18 *2	; volume
 !addr temp1		= $43		; temp
 !addr temp3		= $44		; temp
 !addr temp4		= $45		; temp
+!addr text		= $46		; text to print
 !addr temp7		= $48		; temp timer test
 !addr temp5		= $49		; temp
 !addr banks_counter	= $4a		; counter for banks to test in a cycle
@@ -471,7 +473,7 @@ PlaySound:
 ; calc and print rom checksums
 ROMChecksums:
 	ldx #0				; "CHECKSUMS"
-	jsr DrawMessage			; draw message
+	jsr PrintMessage		; print message
 	lda #SYSTEMBANK
 	sta IndirectBank		; systembank
 	ldy #$00			; first screen position
@@ -530,7 +532,7 @@ rsumlp:	clc
 TimerTest:
 	sei
 	ldx #1				; "TIMERTESTS"
-	jsr DrawMessage			; draw message
+	jsr PrintMessage		; print message
 	jsr InitSystemVectors		; init system hardware vectors
 	jsr InitCIAPointer		; init cia pointer
 	lda #SYSTEMBANK
@@ -822,7 +824,7 @@ InterruptHandler:
 TODTest:
 	sei				; disable interrupts (ALARM test checks reg)
 	ldx #2				; "TOD TESTS"
-	jsr DrawMessage			; draw message
+	jsr PrintMessage		; print message
 	jsr InitCIAPointer		; init cia pointer
 	jsr eciairq			; enable cia irq's
 	ldy #$00
@@ -1016,8 +1018,6 @@ todok:	cld				; reset decimal flag
 ; ----------------------------------------------------------------------------
 ; test, copy code, switch to new bank
 Test:
-	ldx #3				; "TESTBANK"
-	jsr DrawMessage			; draw message
 	lda #$ff
 	sta test_mask			; test-mask - $ff = test all bits
 	ldy last_rambank
@@ -1084,7 +1084,8 @@ tstnocb:jsr TestBank15			; test ram areas in bank 15
 ; ----------------------------------------------------------------------------
 ; Test RAMareas in bank 15
 TestBank15:
-	; STATIC RAM
+	ldx #12				; "STATICRAM"
+;	jsr PrintMessage		; print message
 	lda #SYSTEMBANK
 	sta IndirectBank		; switch to bank 15
 	ldy #$02			; start address low
@@ -1143,11 +1144,12 @@ RamTestBank15:
 	ldy #<(ScreenRAM+40+9)		; screen posotion test bank number	
 	sta (pointer3),y		; write actual test bank number to screen
 	lda temp_bank
-	sta IndirectBank		; restore test bank			********* PATCHED *********
-	cmp #$0f			; check if target = bank 15
+	sta IndirectBank		; restore test bank		********* PATCHED *********
+	cmp #SYSTEMBANK			; check if target = bank 15
 	beq notbnkf			; skip if not bank 15
 	jsr PlaySound			; play sound
-	; LOADRTEST *********************************************************
+	ldx #3				; "LO ADR BY"
+	jsr PrintMessage		; print message
 notbnkf:ldy start_low			; start with Y = $02
 	lda start_high
 	sta pointer1+1			; start with page $00
@@ -1166,6 +1168,7 @@ test1lp:tya				; Y as test-byte
 	lda pointer1+1
 	cmp end_high			; check if last test page
 	bne test1lp			; next page
+	ldx #4				; "HI ADR BY"
 	jsr ResetStartAddress		; reset start address for next test
 ; test 2 with address highbyte
 test2lp:tya
@@ -1189,6 +1192,7 @@ test2lp:tya
 	cmp end_high
 	bne test2lp
 	jsr PlaySound			; play sound
+	ldx #5				; "CHK 55,AA"
 	jsr ResetStartAddress		; reset start address for next test
 ; test 3 first byte with $55, second with $aa
 	lda #$55
@@ -1226,6 +1230,7 @@ test3lp:lda (pointer1),y		; check byte from last test again
 	lda pointer1+1
 	cmp end_high
 	bne test3lp
+	ldx #6				; "CHK AA,55"
 	jsr ResetStartAddress		; reset start address for next test
 ; test 4 first byte with $aa, second with $55
 test4lp:lda (pointer1),y		; check byte from last test again
@@ -1260,6 +1265,7 @@ l23c1:	lda #$55
 	cmp end_high
 	bne test4lp
 	jsr PlaySound			; play sound
+	ldx #7				; "INCADR 5A"
 	jsr ResetStartAddress		; reset start address for next test
 ; test 5 test with $5a
 	ldx #$5a
@@ -1295,6 +1301,7 @@ test5lp:lda (pointer1),y		; check byte from last test again
 	lda pointer1+1
 	cmp end_high
 	bne test5lp
+	ldx #8				; "DECADR A5"
 	jsr MaxStartAddress		; set address to maximum
 ; test 6 with $a5 downwards
 	ldx #$5a
@@ -1337,6 +1344,7 @@ tst6alp:lda (pointer1),y		; check byte from last test again
 	cpy temp2
 	bne tst6alp			; next byte down
 	jsr PlaySound			; play sound
+	ldx #9				; "DECADR 5A"
 	jsr MaxStartAddress		; set address to maximum
 ; test 7 with $5a downwards
 	ldx #$5a
@@ -1375,6 +1383,7 @@ tst7alp:lda (pointer1),y		; check byte from last test again
 +	dey
 	cpy temp2
 	bne tst7alp
+	ldx #10				; "INCADR FF"
 	jsr ResetStartAddress		; reset start address for next test
 ; test 8 with $ff
 	ldx #$ff
@@ -1398,6 +1407,7 @@ test8lp:lda (pointer1),y		; check byte from last test again
 	cmp end_high
 	bne test8lp			; next page
 	jsr PlaySound			; play sound
+	ldx #11				; "DECADR 00"
 	jsr MaxStartAddress		; set address to maximum
 ; test 9 with $00 downwards
 	ldx #$00
@@ -1570,16 +1580,24 @@ colcolx:lda #YELLOW
 	bne colnxty			; next line
 coldone:rts				; returns V = 1 if bank 15 chip was colored!
 ; ----------------------------------------------------------------------------
-; Reset RAM test start address
+; Reset RAM test start address and print text x
 ResetStartAddress:
-	ldy start_low
+	lda IndirectBank
+	cmp #SYSTEMBANK
+	beq +				; skip if systembank
+	jsr PrintMessage		; print message
++	ldy start_low
 	lda start_high
 	sta pointer1+1
 	rts
 ; ----------------------------------------------------------------------------
-; Set RAM Test start address to last byte
-MaxStartAddress
-	ldy end_high
+; Set RAM Test start address to last byte and print text x
+MaxStartAddress:
+	lda IndirectBank
+	cmp #SYSTEMBANK
+	beq +				; skip if systembank
+	jsr PrintMessage		; print message
++	ldy end_high
 	dey
 	sty pointer1+1
 	ldy #$ff
@@ -1692,13 +1710,13 @@ SetExteriorColor:
 	sta (color_pointer),y
 	rts
 ; ----------------------------------------------------------------------------
-; Draw Message - X = message number
-DrawMessage:
+; Print Message - X = message number
+PrintMessage
 	cpx #0
 	beq +				; skip for message 0
 	lda #$00
 -	clc
-	adc #11				; add 11 chars for next message
+	adc #9				; add 9 chars for next message
 	dex
 	bne -
 	tax
@@ -1707,17 +1725,21 @@ DrawMessage:
 	lda #SYSTEMBANK
 	sta IndirectBank		; indirect bank = bank 15
 	lda #<(ScreenRAM+40)
-	sta pointer1
+	sta screen_pointer
 	lda #>(ScreenRAM+40)
-	sta pointer1+1
+	sta screen_pointer+1
 	ldy #$00
 -	lda Messages,x
-	sta (pointer1),y
+	sta (screen_pointer),y
 	inx
 	iny
-	cpy #11
+	cpy #9				; 9 chars printed?
 	bne -
-	lda temp_bank
+	cpx #9				; first message?
+	bne +				; skip if not first message
+	lda #' '
+	sta (screen_pointer),y
++	lda temp_bank
 	sta IndirectBank		; restore target bank
 	rts
 ; ----------------------------------------------------------------------------
@@ -1843,10 +1865,19 @@ CopyPointer:
 ; ************************************* ZONE TABLES ***********************************************
 !zone tables
 Messages:
-	!scr "checksums  "
-	!scr "timertest  "
-	!scr "tod tests  "
-	!scr "testbank   "
+	!scr "checksums"
+	!scr "timertest"
+	!scr "tod tests"
+	!scr "lo adr b "
+	!scr "hi adr b "
+	!scr "cb 55,aa "
+	!scr "cb aa,55 "
+	!scr "+adr 5a  "
+	!scr "-adr a5  "
+	!scr "-adr 5a  "
+	!scr "+adr ff  "
+	!scr "-adr 00  "
+	!scr "stat.ram "
 
 ChipTexts:
 	!scr "tmr"
@@ -1936,7 +1967,7 @@ ScreenData:
 	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
 	!scr "         ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
 	!scr "         ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
-	!scr "v 1.3    82 83 84          02    24 85  "
+	!scr "v. 1.3   82 83 84          02    24 85  "
 ;	!scr "vers 1.1 83 84 04 19 20 82 02    24 85  "				; original
 	!scr "vossi'23                                "
 
