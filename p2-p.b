@@ -1028,29 +1028,28 @@ Test:
 	dex				; decrease for bank to test
 	bpl tstnxbk			; skip if testbank is >= 0
 	ldx last_rambank		; load last RAM bank if code is in bank 0
-tstnxbk:stx copy_target_bank
-; unused variable
-;	stx $31				; remember target (test) bank $31
+tstnxbk:stx copy_target_bank		; new testbank
 	ldx copy_target_bank
-	stx IndirectBank		; set indirect bank = target bank
+	stx IndirectBank		; set indirect bank = testbank
 	jsr RAMTest			; RAM Test - bank below code or last bank
 	ldx copy_target_bank
-	stx copy_source_bank		; source bank = last test bank
+	stx copy_source_bank		; new codebank = last testbank
 	dex				; decrease bank
 	bpl tbnknt0			; skip if testbank is >= 0
-	ldx last_rambank
-tbnknt0:stx copy_target_bank		; store new target bank 
+	ldx last_rambank		; load last RAM bank as new testbank
+tbnknt0:stx copy_target_bank		; store new testbank 
 	dec banks_counter		; decrease banks to test counter
-	bne tstnxbk			; test bank below
+	bne tstnxbk			; test the new testbank
+; all banks tested
 	ldy last_rambank
 	sty banks_counter		; store last bank in banks counter
 	ldx CodeBank
-	dex				; decrease code bank
-	bpl tchknbk			; skip if bank is >= 0
+	dex				; decrease for bank to test
+	bpl tchknbk			; skip if testbank is >= 0
 	ldx last_rambank		; load last RAM bank if code is in bank 0
 tchknbk:lda bank_state,x		; check if RAM bank is OK = $00
 	beq tstcpcd			; jump to code copy if new bank is OK
-tscpnok:dex
+tscpnok:dex				; try next bank
 	bpl notbk0d			; skip if new code bank is >= 0
 	ldx last_rambank		; load last RAM bank if <0
 notbk0d:dec banks_counter
@@ -1149,7 +1148,7 @@ RamTestBank15:
 	cmp #SYSTEMBANK			; check if target = bank 15
 	beq notbnkf			; skip if not bank 15
 	jsr PlaySound			; play sound
-	ldx #3				; "LO ADR BY"
+	ldx #3				; "LO ADR B"
 	jsr PrintMessage		; print message
 notbnkf:ldy start_low			; start with Y = $02
 	lda start_high
@@ -1169,8 +1168,8 @@ test1lp:tya				; Y as test-byte
 	lda pointer1+1
 	cmp end_high			; check if last test page
 	bne test1lp			; next page
-	ldx #4				; "HI ADR BY"
-	jsr ResetStartAddress		; reset start address for next test
+	ldx #4				; "HI ADR B"
+	jsr ResetStartAddress		; reset start address for next test, print message
 ; test 2 with address highbyte
 test2lp:tya
 	sta temp3
@@ -1193,8 +1192,8 @@ test2lp:tya
 	cmp end_high
 	bne test2lp
 	jsr PlaySound			; play sound
-	ldx #5				; "CHK 55,AA"
-	jsr ResetStartAddress		; reset start address for next test
+	ldx #5				; "CB 55,AA"
+	jsr ResetStartAddress		; reset start address for next test, print message
 ; test 3 first byte with $55, second with $aa
 	lda #$55
 	sta temp3
@@ -1231,8 +1230,8 @@ test3lp:lda (pointer1),y		; check byte from last test again
 	lda pointer1+1
 	cmp end_high
 	bne test3lp
-	ldx #6				; "CHK AA,55"
-	jsr ResetStartAddress		; reset start address for next test
+	ldx #6				; "CB AA,55"
+	jsr ResetStartAddress		; reset start address for next test, print message
 ; test 4 first byte with $aa, second with $55
 test4lp:lda (pointer1),y		; check byte from last test again
 	eor temp3
@@ -1266,8 +1265,8 @@ l23c1:	lda #$55
 	cmp end_high
 	bne test4lp
 	jsr PlaySound			; play sound
-	ldx #7				; "INCADR 5A"
-	jsr ResetStartAddress		; reset start address for next test
+	ldx #7				; "+ADR 5A"
+	jsr ResetStartAddress		; reset start address for next test, print message
 ; test 5 test with $5a
 	ldx #$5a
 	stx check
@@ -1302,8 +1301,8 @@ test5lp:lda (pointer1),y		; check byte from last test again
 	lda pointer1+1
 	cmp end_high
 	bne test5lp
-	ldx #8				; "DECADR A5"
-	jsr MaxStartAddress		; set address to maximum
+	ldx #8				; "-ADR A5"
+	jsr MaxStartAddress		; set address to maximum, print message
 ; test 6 with $a5 downwards
 	ldx #$5a
 	stx temp3
@@ -1345,8 +1344,8 @@ tst6alp:lda (pointer1),y		; check byte from last test again
 	cpy temp2
 	bne tst6alp			; next byte down
 	jsr PlaySound			; play sound
-	ldx #9				; "DECADR 5A"
-	jsr MaxStartAddress		; set address to maximum
+	ldx #9				; "-ADR 5A"
+	jsr MaxStartAddress		; set address to maximum, print message
 ; test 7 with $5a downwards
 	ldx #$5a
 test7lp:lda (pointer1),y		; check byte from last test again
@@ -1385,7 +1384,7 @@ tst7alp:lda (pointer1),y		; check byte from last test again
 	cpy temp2
 	bne tst7alp
 	ldx #10				; "INCADR FF"
-	jsr ResetStartAddress		; reset start address for next test
+	jsr ResetStartAddress		; reset start address for next test, print message
 ; test 8 with $ff
 	ldx #$ff
 	stx check
@@ -1409,7 +1408,7 @@ test8lp:lda (pointer1),y		; check byte from last test again
 	bne test8lp			; next page
 	jsr PlaySound			; play sound
 	ldx #11				; "DECADR 00"
-	jsr MaxStartAddress		; set address to maximum
+	jsr MaxStartAddress		; set address to maximum, print message
 ; test 9 with $00 downwards
 	ldx #$00
 	stx temp3
