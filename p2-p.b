@@ -1,5 +1,5 @@
 ; P500 diagnostic-test
-; disassembled by Vossi 04/2020
+; disassembled by Vossi 04/2020, enhanced 11/2023
 ; prepared for ACME reassembling
 ; fix01 - colorbug on diag-screen
 ; fix02 - ram search bug BMI skips also bank if CMP has negative check result in sub
@@ -1460,8 +1460,8 @@ TestError:
 	ldx IndirectBank
 	stx temp_bank			; remember defective test bank
 	ldy temp_bank			; Y = defective test bank
-	cpy #$0f			; check if bank 15
-	beq errbnkf			; skip if bank 15
+	cpy #SYSTEMBANK			; check if bank 15
+	beq errbnkf			; jump to error in bank 15
 				; removed dey to show bank 0 fault ********* PATCHED *********
 	lda #$ff
 	sta bank_state_full,y		; store $ff to bank_state - ?? = defective bank
