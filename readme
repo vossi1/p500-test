@@ -16,3 +16,4 @@ added TOD-Test 1.1
 added ROM Checksums 1.2
 added Timer Tests 1.3
 added RAM Test Messages 1.4, fix10 CopyMemory $0000 detection
+added SID test 1.5 (cbm / kinzi)

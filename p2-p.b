@@ -15,6 +15,7 @@
 ; added ROM Checksums 1.2
 ; added Timer Tests 1.3
 ; added RAM Test Messages 1.4, fix10 CopyMemory $0000 detection
+; added SID-Test 1.5 (CBM / Kinzi)
 !cpu 6502
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 ; switches
@@ -65,9 +66,12 @@ OSC2			= $07 *2	; oscillator 2
 OSC3			= $0e *2	; oscillator 3
 FREQLO			= $00 *2	; frequency lo
 FREQHI			= $01 *2	; frequency hi
+PWLO			= $02 *2	; pulse width lo
+PWHI			= $03 *2	; pulse width hi
 OSCCTL			= $04 *2	; oscillator control
 ATKDCY			= $05 *2	; attack/decay
 SUSREL			= $06 *2	; sustain/release
+RESFILT			= $17 *2	; resonance/filter
 VOLUME			= $18 *2	; volume
 ; ***************************************** ADDRESSES *********************************************
 !addr CodeBank		= $00		; code bank register
@@ -362,8 +366,8 @@ Main:
 	sta IndirectBank		; switch to bank 15
 	jsr PlaySound			; play sound
 	jsr SetExteriorColor		; increase exterior color after each cycle
-	jsr ROMChecksums		; calc and print ROM checksums
-	jsr TimerTest			; timer test
+	jsr ROMChecksums		; calc and print ROM checksums		********** EXTENDED **********
+	jsr TimerTest			; timer test				********** EXTENDED **********
 	jsr TODTest			; tod test				********** EXTENDED **********
 	jsr DummySub			; Call 19x dummy-subroutine
 	jsr DummySub
@@ -425,6 +429,7 @@ mprtdig:lda cycles,x			; load digit again
 	cpx #$04
 	bne mprtnxt			; print next digit
 	cld				; clear decimal flag
+	jsr SIDTest			; SID test				********** EXTENDED **********
 	jmp Main			; next test cycle
 ; ----------------------------------------------------------------------------
 ; Dummy subroutine
@@ -1016,6 +1021,190 @@ todbad:	lda #$ff			; state = TOD bad
 	sta tod_state
 todok:	cld				; reset decimal flag
 	rts
+; ----------------------------------------------------------------------------
+; SID Test (CBM / kinzi)
+SIDTest:
+	lda #$ff
+	jsr SIDTestDelay
+	lda #$ff
+	jsr SIDTestDelay
+	lda #$ff
+	jsr SIDTestDelay
+	ldx #13				; "SID TEST"
+	jsr PrintMessage		; print message
+	lda IndirectBank
+	sta temp_bank			; remember target bank
+	lda #SYSTEMBANK
+	sta IndirectBank		; indirect bank = bank 15
+	lda #$14
+	ldy #$00			; clear Y for indirect writes
+	sta (sid+VOLUME),y		; volume = 4, low pass on
+	lda #$00
+	sta (sid+RESFILT),y		; resonance/filter off
+	lda #$3e
+	sta (sid+OSC1+ATKDCY),y		; set envelope of osc1
+	lda #$ca
+	sta (sid+OSC1+SUSREL),y
+	lda #$00
+	sta (sid+OSC3+OSCCTL),y		; osc3 off
+	lda #$03			; cycle through 4 waveforms
+nwavfrm:pha				; save waveform index on stack
+
+	ldx #$06			; play 7 notes
+playv1:	lda SidFreqV1Hi,x		; on voice #1
+	sta (sid+OSC1+FREQHI),y		; voice 1 frequency hi
+	lda SidFreqV1Lo,x
+	sta (sid+OSC1+FREQLO),y		; voice 1 frequency low
+
+	pla				; get waveform index from stack
+	pha
+	tay
+	lda SidPWidthLo,y		; load pulse width value LO for index no. Y
+	ldy #$00
+	sta (sid+OSC1+PWLO),y		; set pulse width LO              
+	pla				; get waveform index from stack
+	pha
+	tay
+	lda SidPWidthHi,y		; load pulse width value HI for index no. Y
+	ldy #$00
+	sta (sid+OSC1+PWHI),y		; set pulse width HI              
+	pla				; get waveform index from stack
+	pha
+	tay
+	lda SidWaveForms,y		; load waveform value for index no. Y
+	ldy #$00
+	sta (sid+OSC1+OSCCTL),y		; set waveform
+		    
+	lda #$6a
+	jsr SIDTestDelay
+	lda #$00
+	tay
+	sta (sid+OSC1+OSCCTL),y		; osc1 off
+	jsr SIDTestDelay
+	ldy #$00
+	dex
+	bne playv1			; play next note
+	tya
+	sta (sid+RESFILT),y		; resonance/filter off
+	lda #$18
+	sta (sid+VOLUME),y		; volume = 8, low pass on
+	lda #$3e
+	sta (sid+OSC2+ATKDCY),y		; set envelope of next osc
+	lda #$ca
+	sta (sid+OSC2+SUSREL),y
+
+	ldx #$06			; play 7 notes
+playv2: lda SidFreqV2Hi,x		; on voice #2
+	sta (sid+OSC2+FREQHI),y		; voice 2 frequency hi
+	lda SidFreqV2Lo,x
+	sta (sid+OSC2+FREQLO),y		; voice 2 frequency low
+
+	pla				; get waveform index from stack
+	pha
+	tay
+	lda SidPWidthLo,y		; load pulse width value LO for index no. Y
+	ldy #$00
+	sta (sid+OSC2+PWLO),y		; set pulse width LO              
+	pla				; get waveform index from stack
+	pha
+	tay
+	lda SidPWidthHi,y		; load pulse width value HI for index no. Y
+	ldy #$00
+	sta (sid+OSC2+PWHI),y		; set pulse width HI              
+	pla				; get waveform index from stack
+	pha
+	tay
+	lda SidWaveForms,y		; load waveform value for index no. Y
+	ldy #$00
+	sta (sid+OSC2+OSCCTL),y		; set waveform
+		    
+	lda #$6a
+	jsr SIDTestDelay
+	lda #$00
+	tay
+	sta (sid+OSC2+OSCCTL),y		; osc2 off
+	jsr SIDTestDelay
+	ldy #$00
+	dex
+	bne playv2			; play next note
+	tya
+	sta (sid+RESFILT),y		; resonance/filter off
+	lda #$1f
+	sta (sid+VOLUME),y		; volume = 15, low pass on
+	lda #$3e
+	sta (sid+OSC3+ATKDCY),y		; set envelope of next osc
+	lda #$ca
+	sta (sid+OSC3+SUSREL),y
+
+	ldx #$06			; play 7 notes
+playv3:	lda SidFreqV3Hi,x		; on voice #3
+	sta (sid+OSC3+FREQHI),y		; voice 3 frequency hi
+	lda SidFreqV3Lo,x
+	sta (sid+OSC3+FREQLO),y		; voice 3 frequency low
+
+	pla				; get waveform index from stack
+	pha
+	tay
+	lda SidPWidthLo,y		; load pulse width value LO for index no. Y
+	ldy #$00
+	sta (sid+OSC3+PWLO),y		; set pulse width LO              
+	pla				; get waveform index from stack
+	pha
+	tay
+	lda SidPWidthHi,y		; load pulse width value HI for index no. Y
+	ldy #$00
+	sta (sid+OSC3+PWHI),y		; set pulse width HI              
+	pla				; get waveform index from stack
+	pha
+	tay
+	lda SidWaveForms,y		; load waveform value for index no. Y
+	ldy #$00
+	sta (sid+OSC3+OSCCTL),y		; set waveform
+		    
+	lda #$6a
+	jsr SIDTestDelay
+	lda #$00
+	tay
+	sta (sid+OSC3+OSCCTL),y		; osc3 off
+	jsr SIDTestDelay
+	ldy #$00
+	dex
+	bne playv3			; play next note
+	pla
+	tay
+	dey
+	tya
+	bmi sidend
+	ldy #$00
+	jmp nwavfrm			; start over with next waveform
+
+sidend:	lda #$ff
+	jsr SIDTestDelay
+	lda #$ff
+	jsr SIDTestDelay
+	lda #$ff
+	jsr SIDTestDelay
+	lda temp_bank
+	sta IndirectBank		; restore target bank
+	rts
+; ----------------------------------------------------------------------------
+; SID test Delay Loop
+SIDTestDelay:
+	cmp #$00
+	beq siddend
+	tay
+	txa
+	pha
+	tya
+	tax
+siddlp1:ldy #$ff
+siddlp2:dey
+	bne siddlp2
+	dex
+	bne siddlp1
+	pla
+	tax
+siddend:rts
 ; ----------------------------------------------------------------------------
 ; test, copy code, switch to new bank
 Test:
@@ -1878,6 +2067,7 @@ Messages:
 	!scr "+adr ff  "
 	!scr "-adr 00  "
 	!scr "static   "
+	!scr "sid test "
 
 ChipTexts:
 	!scr "tmr"
@@ -1934,6 +2124,26 @@ TPI1Regs:
 TPI2Regs:
 	!byte $00, $df, $01, $df, $02, $df, $03, $df
 	!byte $04, $df, $05, $df, $06, $df, $07, $df
+
+; SID test data
+SidFreqV1Hi:
+	!byte $11, $15, $19, $22, $19, $15, $11
+SidFreqV1Lo:
+	!byte $25, $9a, $b1, $4b, $b1, $9a, $25
+SidFreqV2Hi;
+	!byte $22, $2b, $33, $44, $33, $2b, $22
+SidFreqV2Lo:
+	!byte $4b, $34, $61, $95, $61, $34, $4b
+SidFreqV3Hi:
+	!byte $44, $56, $66, $89, $66, $56, $44
+SidFreqV3Lo:
+	!byte $95, $69, $c2, $2b, $c2, $69, $95
+SidWaveForms:
+	!byte $81, $45, $25, $11
+SidPWidthLo:
+	!byte $00, $00, $00, $00
+SidPWidthHi:
+	!byte $00, $08, $00, $00
 ; ************************************* ZONE SCREENDATA *******************************************
 !zone screendata
 *= $3000
@@ -1967,9 +2177,9 @@ ScreenData:
 	!scr "         ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50," ",$4f,$50,"  "
 	!scr "         ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a," ",$74,$6a,"  "
 	!scr "         ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a," ",$4c,$7a,"  "
-	!scr "v. 1.4   82 83 84          02    24 85  "
+	!scr "v. 1.5   82 83 84 04       02    24 85  "
 ;	!scr "vers 1.1 83 84 04 19 20 82 02    24 85  "				; original
-	!scr "vossi'23                                "
+	!scr "vossi'24                                "
 
 	!byte $00, $20, $20, $20, $20, $20, $20, $20				; last 24 bytes behind screenRAM
 	!byte $20, $20, $20, $20, $20, $20, $20, $20
