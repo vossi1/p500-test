@@ -1924,7 +1924,7 @@ PrintMessage
 	iny
 	cpy #9				; 9 chars printed?
 	bne -
-	cpx #9				; first message?
+	cpx #13*9+9			; first message?
 	bne +				; skip if not first message
 	lda #' '
 	sta (screen_pointer),y
