@@ -747,7 +747,6 @@ tok30:	lda timer_state			; dec fault counter
 	sta pointer2
 	lda #$d3
 	sta pointer2+1			; set screen pointer to color RAM
-	lda CodeBank
 	jsr ColorFaultyChip		; color 6526 U02 - V=0 if already colored
 	ldx #0				; text tmr
 	jsr PrintChipText		; print text in 6526
@@ -930,7 +929,6 @@ todfail:lda #$3b
 	sta pointer2
 	lda #$d3
 	sta pointer2+1			; set screen pointer to color RAM
-	lda CodeBank
 	jsr ColorFaultyChip		; color 6526 U02 - V=0 if already colored
 	ldx #1				; text tod
 	jsr PrintChipText		; print text in 6526
