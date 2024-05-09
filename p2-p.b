@@ -1,5 +1,5 @@
 ; P500 diagnostic-test
-; disassembled by Vossi 04/2020, enhanced 11/2023
+; disassembled by Vossi 04/2020, enhanced 5/2024
 ; prepared for ACME reassembling
 ; fix01 - colorbug on diag-screen
 ; fix02 - ram search bug BMI skips also bank if CMP has negative check result in sub
@@ -20,9 +20,7 @@
 !ct scr		; standard text/char conversion table -> Screencode (pet = PETSCII, raw)
 ; switches
 ;VICE = 1	; 2 Rambanks for Vice (RAM detection doesn't work properly in Vice)
-;ROM = 0	; assemble extension rom
-!ifdef 	ROM{!to "p2-p.bin", plain
-} else{ 	!to "p2-p.prg", cbm }
+!to "p2-p.prg", cbm
 ; ***************************************** IMPORTANT *********************************************
 CODESIZE		= $30		; Codesize to copy from bank to bank !!!
 ; ***************************************** CONSTANTS *********************************************
@@ -2182,8 +2180,3 @@ ScreenData:
 	!byte $00, $20, $20, $20, $20, $20, $20, $20				; last 24 bytes behind screenRAM
 	!byte $20, $20, $20, $20, $20, $20, $20, $20
 	!byte $20, $20, $20, $20, $20, $20, $20, $20
-
-!ifdef ROM{
-*= $3fff
-	!byte $00
-}
